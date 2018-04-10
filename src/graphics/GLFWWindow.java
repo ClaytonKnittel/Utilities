@@ -1,7 +1,8 @@
 package graphics;
 
 import static org.lwjgl.glfw.GLFW.*;
-import static graphics.GraphicsHandler.fileToStr;
+
+import java.util.LinkedList;
 
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWKeyCallback;
@@ -21,14 +22,15 @@ public class GLFWWindow {
 	
 	double nextTime = 1;
 	
-	private GraphicsHandler g;
+	//private GraphicsHandler g;
+	private LinkedList<State> states;
 	
 	private long last;
 	
 	private QuitAction q;
 	
 	
-	public GLFWWindow() {
+	public GLFWWindow(State... states) {
 		errorCallback = GLFWErrorCallback.createPrint(System.err);
 		
 		if (!glfwInit()) {
@@ -56,21 +58,19 @@ public class GLFWWindow {
 		glfwMakeContextCurrent(window);
 		GL.createCapabilities();
 		
-		g = new GraphicsHandler();
+		this.states = new LinkedList<State>();
+		for (State s : states)
+			this.states.add(s);
     	
     	last = System.currentTimeMillis();
-	}
-	
-	public void loadShaders(String vertexShaderLocation, String fragmentShaderLocation) {
-		g.loadVertexShader(fileToStr(vertexShaderLocation));
-		g.loadFragmentShader(fileToStr(fragmentShaderLocation));
 	}
 	
 	/**
 	 * Call after loading shaders
 	 */
 	public void enter() {
-		g.enter();
+		for (State s : states)
+			s.enter();
 	}
 	
 	public void setQuitAction(QuitAction q) {
@@ -100,16 +100,22 @@ public class GLFWWindow {
 			System.out.println(glfwGetTime());
 		}
 		
-		g.update(System.currentTimeMillis() - last);
-		last = System.currentTimeMillis();
-		g.render();
+		long l = System.currentTimeMillis();
+		
+		for (State s : states)
+			s.update(l - last);
+		for (State s : states)
+			s.render(0);
+		
+		last = l;
 		
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
 	
 	public void destroy() {
-		g.exit();
+		for (State s : states)
+			s.exit();
 		glfwDestroyWindow(window);
 		keyCallback.free();
 		glfwTerminate();

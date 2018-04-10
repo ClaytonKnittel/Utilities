@@ -12,6 +12,7 @@ public class Batch {
 	
 	private final int size;
 	private FloatBuffer vertices;
+	private VertexArrayObject vao;
 	private final VertexBufferObject vbo;
 	
 	private boolean drawing;
@@ -25,6 +26,9 @@ public class Batch {
 	 */
 	public Batch(int size, int numBytesInVertexAttributes) {
 		numVertexAttribBytes = numBytesInVertexAttributes;
+		
+		vao = new VertexArrayObject();
+		vao.bind();
 		
     	vbo = new VertexBufferObject();
     	vbo.bind(GL_ARRAY_BUFFER);
@@ -68,7 +72,7 @@ public class Batch {
      */
     public void dispose() {
         MemoryUtil.memFree(vertices);
-
+        vao.delete();
         vbo.delete();
     }
     
@@ -82,6 +86,7 @@ public class Batch {
 				System.err.println("Error in drawing float buffer data: not a multiple of " + numVertexAttribBytes + " buffer data was input");
 				e.printStackTrace();
 			}
+			numVertices ++;
     	}
     }
     
@@ -96,6 +101,8 @@ public class Batch {
     private void flush() {
         if (numVertices > 0) {
             vertices.flip();
+            
+            vao.bind();
             
             /* Upload the new vertex data */
             vbo.bind(GL_ARRAY_BUFFER);

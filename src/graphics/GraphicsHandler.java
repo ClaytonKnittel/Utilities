@@ -1,7 +1,5 @@
 package graphics;
 
-import static org.lwjgl.opengl.GL15.GL_ARRAY_BUFFER;
-import static org.lwjgl.opengl.GL15.GL_STATIC_DRAW;
 import static org.lwjgl.opengl.GL20.GL_FRAGMENT_SHADER;
 import static org.lwjgl.opengl.GL20.GL_VERTEX_SHADER;
 
@@ -15,8 +13,6 @@ import org.lwjgl.system.MemoryStack;
 
 import files.FileManager;
 import graphics.entities.Batch;
-import graphics.entities.VertexArrayObject;
-import graphics.entities.VertexBufferObject;
 import graphics.shaders.Shader;
 import graphics.shaders.ShaderProgram;
 import tensor.Matrix4;
@@ -25,8 +21,6 @@ public class GraphicsHandler {
 	
 	private CharSequence vertexSource, fragmentSource;
 	
-	private VertexArrayObject vao;
-	//private VertexBufferObject vbo;
 	private Batch batch;
 	private Shader vertexShader;
 	private Shader fragmentShader;
@@ -43,20 +37,12 @@ public class GraphicsHandler {
 	}
 	
 	public void loadVertexShader(String code) {
+		System.out.println(code);
 		vertexSource = code;
 	}
 	
 	public void loadFragmentShader(String code) {
 		fragmentSource = code;
-	}
-	
-	public static String fileToStr(String location) {
-		try {
-			return FileManager.readAll(location);
-		} catch (IOException e) {
-			e.printStackTrace();
-			return "";
-		}
 	}
 	
 	
@@ -71,33 +57,39 @@ public class GraphicsHandler {
 	public void render() {
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
 		
-		vao.bind();
-		program.use();
-		
-		batch.begin();
-		float[] vertices = new float[] {
-			-0.6f, -0.4f, 0f, 1f, 0f, 0f,
-	      	0.6f, -0.4f, 0f, 0f, 1f, 0f,
-	      	0f, 0.6f, 0f, 0f, 0f, 1f
-		};
-		batch.draw(vertices);
 		
 		/*
 		 * Set uniforms
 		 */
-        Matrix4 model = Matrix4.translate(0, time / 3000f, 0).multiply(Matrix4.rotate(time / 10f, 1f, 0f, 1f));
+        Matrix4 model = Matrix4.translate(0, 0, 0).multiply(Matrix4.rotate(0, 0f, 0f, 1f));
         program.setUniform(uniModel, model);
+        
+		program.use();
+		batch.begin();
+		
+		try (MemoryStack stack = MemoryStack.stackPush()) {
+			FloatBuffer vertices = stack.mallocFloat(3 * 6);
+            vertices.put(-0.6f).put(-0.4f).put(0f).put(1f).put(0f).put(0f);
+            vertices.put(0.6f).put(-0.4f).put(0f).put(0f).put(1f).put(0f);
+            vertices.put(0f).put(0.6f).put(0f).put(0f).put(0f).put(1f);
+            vertices.flip();
+            
+    		batch.draw(vertices);
+    		vertices.clear();
+            /* Generate Vertex Buffer Object */
+		}
+//		float[] vertices = new float[] {
+//			-0.6f, -0.4f, 0f, 1f, 0f, 0f,
+//	      	0.6f, -0.4f, 0f, 0f, 1f, 0f,
+//	      	0f, 0.6f, 0f, 0f, 0f, 1f
+//		};
         
         
 		batch.end();
-		
-		GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, 3);
 	}
 
     public void enter() {
         /* Generate Vertex Array Object */
-        vao = new VertexArrayObject();
-        vao.bind();
 
 //        try (MemoryStack stack = MemoryStack.stackPush()) {
 //            /* Vertex data */
@@ -159,7 +151,6 @@ public class GraphicsHandler {
     }
 	
 	public void exit() {
-        vao.delete();
         batch.dispose();
         vertexShader.delete();
         fragmentShader.delete();
