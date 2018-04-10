@@ -26,10 +26,13 @@ public class RigidState extends StandardState {
 
 	private int uniModel;
 	
+	private int numVertices;
+		
 	public RigidState(float[] shapeData, String vertexLoc, String fragmentLoc) {
 		this.shapeData = FloatBuffer.wrap(shapeData);
 		this.vertexLoc = vertexLoc;
 		this.fragmentLoc = fragmentLoc;
+		this.numVertices = 0;
 	}
 	
 	public void input() {
@@ -41,25 +44,25 @@ public class RigidState extends StandardState {
 	}
 
 	public void render(float alpha) {
-		glClear(GL_COLOR_BUFFER_BIT);
-
 		vao.bind();
 		program.use();
 
 		Matrix4 model = Matrix4.rotate(0, 0f, 0f, 1f);
 		program.setUniform(uniModel, model);
 
-		glDrawArrays(GL_TRIANGLES, 0, 3);
+		glDrawArrays(GL_TRIANGLES, 0, numVertices);
 	}
 	
 	private void instantiateVBO(FloatBuffer buffer) {
 		FloatBuffer vertices;
 		try (MemoryStack stack = MemoryStack.stackPush()) {
 			/* Vertex data */
-			vertices = stack.mallocFloat(3 * 6);
+			vertices = stack.mallocFloat(buffer.limit());
 			for (int i = 0; i < vertices.capacity(); i++) {
 				vertices.put(buffer.get());
 			}
+			numVertices = buffer.limit() / 6;
+			
 			vertices.flip();
 			
 			vbo = new VertexBufferObject();

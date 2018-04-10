@@ -1,6 +1,8 @@
 package graphics;
 
 import static org.lwjgl.glfw.GLFW.*;
+import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
+import static org.lwjgl.opengl.GL11.glClear;
 
 import java.util.LinkedList;
 
@@ -104,6 +106,8 @@ public class GLFWWindow {
 		
 		for (State s : states)
 			s.update(l - last);
+
+		glClear(GL_COLOR_BUFFER_BIT);
 		for (State s : states)
 			s.render(0);
 		
