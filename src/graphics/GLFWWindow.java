@@ -1,14 +1,15 @@
 package graphics;
 
 import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
-import static org.lwjgl.opengl.GL11.glClear;
 
 import java.util.LinkedList;
+import java.util.Map;
 
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWKeyCallback;
 import org.lwjgl.opengl.GL;
+
+import graphics.input.KeyAction;
 
 
 public class GLFWWindow {
@@ -27,12 +28,18 @@ public class GLFWWindow {
 	//private GraphicsHandler g;
 	private LinkedList<State> states;
 	
+	private Renderer r;
+	
 	private long last;
 	
 	private QuitAction q;
 	
 	
-	public GLFWWindow(State... states) {
+	public void quit() {
+		glfwSetWindowShouldClose(window, true);
+	}
+	
+	public GLFWWindow(int width, int height, String name, Map<Integer, KeyAction> keyPressed, Map<Integer, KeyAction> keyReleased) {
 		errorCallback = GLFWErrorCallback.createPrint(System.err);
 		
 		if (!glfwInit()) {
@@ -40,7 +47,7 @@ public class GLFWWindow {
 		}
 		
 		useOpenGL3_2CoreProfileContext();
-		window = glfwCreateWindow(800, 600, "Planetary Motion", 0, 0);
+		window = glfwCreateWindow(width, height, name, 0, 0);
 		if (window == 0) {
 			glfwTerminate();
 			throw new RuntimeException("Failed to create the GLFW window");
@@ -49,8 +56,12 @@ public class GLFWWindow {
 		keyCallback = new GLFWKeyCallback() {
 			@Override
 			public void invoke(long window, int key, int scancode, int action, int mods) {
-				if (key == GLFW_KEY_Q && action == GLFW_PRESS) {
-					glfwSetWindowShouldClose(window, true);
+				if (action == GLFW_PRESS) {
+					if (keyPressed.containsKey(key))
+						keyPressed.get(key).act();
+				} else if (action == GLFW_RELEASE) {
+					if (keyReleased.containsKey(key))
+						keyReleased.get(key).act();
 				}
 			}
 		};
@@ -60,19 +71,23 @@ public class GLFWWindow {
 		glfwMakeContextCurrent(window);
 		GL.createCapabilities();
 		
+		r = new Renderer();
+		
 		this.states = new LinkedList<State>();
-		for (State s : states)
-			this.states.add(s);
     	
     	last = System.currentTimeMillis();
+	}
+	
+	public void add(State...states) {
+		for (State s : states)
+			this.states.add(s);
 	}
 	
 	/**
 	 * Call after loading shaders
 	 */
 	public void enter() {
-		for (State s : states)
-			s.enter();
+		r.enter(states);
 	}
 	
 	public void setQuitAction(QuitAction q) {
@@ -104,12 +119,8 @@ public class GLFWWindow {
 		
 		long l = System.currentTimeMillis();
 		
-		for (State s : states)
-			s.update(l - last);
-
-		glClear(GL_COLOR_BUFFER_BIT);
-		for (State s : states)
-			s.render(0);
+		r.update(states, l - last);
+		r.render(states, 0);
 		
 		last = l;
 		
@@ -120,6 +131,7 @@ public class GLFWWindow {
 	public void destroy() {
 		for (State s : states)
 			s.exit();
+		r.exit();
 		glfwDestroyWindow(window);
 		keyCallback.free();
 		glfwTerminate();

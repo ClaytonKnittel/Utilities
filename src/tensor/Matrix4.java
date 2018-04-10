@@ -418,5 +418,17 @@ public class Matrix4 {
 
         return scaling;
     }
+    
+    @Override
+    public String toString() {
+    	return  round(m00) + "\t" + round(m01) + "\t" + round(m02) + "\t" + round(m03) + "\n" +
+    			round(m10) + "\t" + round(m11) + "\t" + round(m12) + "\t" + round(m13) + "\n" +
+    			round(m20) + "\t" + round(m21) + "\t" + round(m22) + "\t" + round(m23) + "\n" +
+    			round(m30) + "\t" + round(m31) + "\t" + round(m32) + "\t" + round(m33);
+    }
+    
+    private static float round(float r) {
+    	return Math.round(r * 1000) / 1000f;
+    }
 
 }
