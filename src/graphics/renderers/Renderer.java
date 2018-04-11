@@ -1,4 +1,4 @@
-package graphics;
+package graphics.renderers;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL20.GL_FRAGMENT_SHADER;
@@ -12,6 +12,7 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.system.MemoryStack;
 
 import files.FileManager;
+import graphics.State;
 import graphics.shaders.Shader;
 import graphics.shaders.ShaderProgram;
 import tensor.Matrix4;
@@ -25,13 +26,13 @@ public class Renderer {
 	
 	private static int uniModel;
 	
-	private static final String defaultVertexShader, defaultFragmentShader;
+	public static final String defaultVertexShader, defaultFragmentShader;
 	
 	private static final float FOV = 72;
 	private static final float NEAR_PLANE = 0.1f;
 	private static final float FAR_PLANE = 1000f;
 	
-	public int pos, color;
+	private InputVariable[] inputs;
 	
 	static {
 		defaultVertexShader = "/Users/claytonknittel/git/Utilities/src/graphics/shaders/vertexShader";
@@ -39,9 +40,10 @@ public class Renderer {
 	}
 	
 	public Renderer() {
+		this(defaultVertexShader, defaultFragmentShader);
 	}
 	
-	public void enter(Iterable<State> states) {
+	public Renderer(String vertexShaderLoc, String fragmentShaderLoc) {
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
 
@@ -52,27 +54,60 @@ public class Renderer {
 		
 		uniModel = program.getUniformLocation("model");
 		
-		configureAttributeLocations();
-		
-		for (State s : states)
-			s.enter(program, pos, color);
-		
 		setViewMatrix();
 		setProjectionMatrix();
 	}
 	
-	public void update(Iterable<State> states, float delta) {
-		for (State s : states)
-			s.update(delta);
+	public ShaderProgram shaderProgram() {
+		return program;
 	}
 	
-	public void render(Iterable<State> states, float alpha) {
+	public InputVariable[] inputs() {
+		return inputs;
+	}
+	
+	/**
+	 * Call before enter()
+	 * 
+	 * @param names a list of the names of input variables, of the form "pos, color, ..."
+	 * @param sizes the corresponding sizes of each of the input variables (how many degrees of freedom each has)
+	 */
+	public void configureInputVariables(String names, int... sizes) {
+		inputs = new InputVariable[sizes.length];
+		String[] name = names.split(", ");
+		if (name.length != sizes.length)
+			throw new IllegalArgumentException("number of names and sizes need to be the same, but were " + name.length + " and " + sizes.length);
+		
+		for (int i = 0; i < sizes.length; i++)
+			inputs[i] = new InputVariable(program.getAttributeLocation(name[i]), name[i], sizes[i]);
+	}
+	
+	/**
+	 * Call after configureInputVariables()
+	 * <p>
+	 * This configures each state's VAO to draw with the strategies defined in this Renderer
+	 * 
+	 * @param states the states to be entered with this Renderer
+	 */
+	public void enter(Iterable<State> states) {
+		for (State s : states)
+			s.enter(this);
+	}
+	
+	
+	
+	public void update(Iterable<State> states) {
+		for (State s : states)
+			s.update();
+	}
+	
+	public void render(Iterable<State> states) {
 		GL11.glEnable(GL11.GL_DEPTH_TEST);
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 		
 		program.use();
 		for (State s : states)
-			s.render(program, uniModel, alpha);
+			s.render(program, uniModel);
 	}
 	
 	public ShaderProgram initiateProgram(Shader vertexShader, Shader fragmentShader) {
@@ -101,17 +136,13 @@ public class Renderer {
 	/**
 	 * Specifies the vertex attributes.
 	 */
-	private void configureAttributeLocations() {
-		/* Specify Vertex Pointer */
-		pos = program.getAttributeLocation("pos");
-//		program.enableVertexAttribute(posAttrib);
-//		program.pointVertexAttribute(posAttrib, 3, 6 * Float.BYTES, 0);
-
-		/* Specify Color Pointer */
-		color = program.getAttributeLocation("color");
-//		program.enableVertexAttribute(colAttrib);
-//		program.pointVertexAttribute(colAttrib, 3, 6 * Float.BYTES, 3 * Float.BYTES);
-	}
+//	private void configureAttributeLocations() {
+//		/* Specify Vertex Pointer */
+//		pos = program.getAttributeLocation("pos");
+//
+//		/* Specify Color Pointer */
+//		color = program.getAttributeLocation("color");
+//	}
 	
 	public void setViewMatrix() {
 		Matrix4 view = new Matrix4();

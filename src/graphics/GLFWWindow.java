@@ -9,9 +9,25 @@ import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWKeyCallback;
 import org.lwjgl.opengl.GL;
 
+import graphics.entities.GLFWRenderable;
 import graphics.input.KeyAction;
+import graphics.renderers.Renderer;
 
-
+/**
+ * @author claytonknittel
+ * <p>
+ * 
+ * Call order:
+ * <br>
+ * constuctor
+ * <br>
+ * configureInputs
+ * <br>
+ * add states
+ * <br>
+ * enter
+ * 
+ */
 public class GLFWWindow {
 	
 	/**
@@ -23,14 +39,10 @@ public class GLFWWindow {
 	
 	private long window;
 	
-	double nextTime = 1;
-	
 	//private GraphicsHandler g;
 	private LinkedList<State> states;
 	
 	private Renderer r;
-	
-	private long last;
 	
 	private QuitAction q;
 	
@@ -40,6 +52,10 @@ public class GLFWWindow {
 	}
 	
 	public GLFWWindow(int width, int height, String name, Map<Integer, KeyAction> keyPressed, Map<Integer, KeyAction> keyReleased) {
+		this(width, height, name, keyPressed, keyReleased, Renderer.defaultVertexShader, Renderer.defaultFragmentShader);
+	}
+	
+	public GLFWWindow(int width, int height, String name, Map<Integer, KeyAction> keyPressed, Map<Integer, KeyAction> keyReleased, String vertexShaderLoc, String fragmentShaderLoc) {
 		errorCallback = GLFWErrorCallback.createPrint(System.err);
 		
 		if (!glfwInit()) {
@@ -71,16 +87,18 @@ public class GLFWWindow {
 		glfwMakeContextCurrent(window);
 		GL.createCapabilities();
 		
-		r = new Renderer();
+		r = new Renderer(vertexShaderLoc, fragmentShaderLoc);
 		
 		this.states = new LinkedList<State>();
-    	
-    	last = System.currentTimeMillis();
+   	}
+	
+	public void configureInputs(String names, int[] sizes) {
+		r.configureInputVariables(names, sizes);
 	}
 	
-	public void add(State...states) {
-		for (State s : states)
-			this.states.add(s);
+	public void add(GLFWRenderable...states) {
+		for (GLFWRenderable g : states)
+			this.states.add(new RigidState(g));
 	}
 	
 	/**
@@ -112,17 +130,9 @@ public class GLFWWindow {
 	}
 	
 	public void render() {
-		if (glfwGetTime() > nextTime) {
-			nextTime += 1;
-			System.out.println(glfwGetTime());
-		}
+		r.update(states);
+		r.render(states);
 		
-		long l = System.currentTimeMillis();
-		
-		r.update(states, l - last);
-		r.render(states, 0);
-		
-		last = l;
 		
 		glfwSwapBuffers(window);
 		glfwPollEvents();
