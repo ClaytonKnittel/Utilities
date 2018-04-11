@@ -61,11 +61,21 @@ public class RigidState implements graphics.State {
 		}
 	}
 
-	public void enter() {
+	public void enter(ShaderProgram p, int posAttrib, int colorAttrib) {
 		vao = new VertexArrayObject();
 		vao.bind();
 		
 		instantiateVBO(this.shapeData);
+		
+		specifyVertexAttributes(p, posAttrib, colorAttrib);
+	}
+	
+	private void specifyVertexAttributes(ShaderProgram p, int pos, int color) {
+		p.enableVertexAttribute(pos);
+		p.pointVertexAttribute(pos, 3, 6 * Float.BYTES, 0);
+		
+		p.enableVertexAttribute(color);
+		p.pointVertexAttribute(color, 3, 6 * Float.BYTES, 3 * Float.BYTES);
 	}
 
 	public void exit() {

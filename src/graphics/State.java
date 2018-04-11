@@ -7,7 +7,7 @@ public interface State {
 	/**
 	 * Initializes the state
 	 */
-	void enter();
+	void enter(ShaderProgram p, int posAttrib, int colorAttrib);
 	
 	/**
 	 * Updates the location of the object / uniform variables

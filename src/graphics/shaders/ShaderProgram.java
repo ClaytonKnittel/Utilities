@@ -105,7 +105,7 @@ public class ShaderProgram {
     }
 
     /**
-     * Gets the location of an uniform variable with specified name.
+     * Gets the location of a uniform variable with specified name.
      *
      * @param name Uniform name
      *

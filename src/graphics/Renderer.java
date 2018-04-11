@@ -31,6 +31,8 @@ public class Renderer {
 	private static final float NEAR_PLANE = 0.1f;
 	private static final float FAR_PLANE = 1000f;
 	
+	public int pos, color;
+	
 	static {
 		defaultVertexShader = "/Users/claytonknittel/git/Utilities/src/graphics/shaders/vertexShader";
 		defaultFragmentShader = "/Users/claytonknittel/git/Utilities/src/graphics/shaders/fragmentShader";
@@ -42,9 +44,6 @@ public class Renderer {
 	public void enter(Iterable<State> states) {
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
-		
-		for (State s : states)
-			s.enter();
 
 		vertexShader = Shader.createShader(GL_VERTEX_SHADER, fileToStr(defaultVertexShader));
 		fragmentShader = Shader.createShader(GL_FRAGMENT_SHADER, fileToStr(defaultFragmentShader));
@@ -53,7 +52,10 @@ public class Renderer {
 		
 		uniModel = program.getUniformLocation("model");
 		
-		specifyVertexAttributes();
+		configureAttributeLocations();
+		
+		for (State s : states)
+			s.enter(program, pos, color);
 		
 		setViewMatrix();
 		setProjectionMatrix();
@@ -99,16 +101,16 @@ public class Renderer {
 	/**
 	 * Specifies the vertex attributes.
 	 */
-	private void specifyVertexAttributes() {
+	private void configureAttributeLocations() {
 		/* Specify Vertex Pointer */
-		int posAttrib = program.getAttributeLocation("pos");
-		program.enableVertexAttribute(posAttrib);
-		program.pointVertexAttribute(posAttrib, 3, 6 * Float.BYTES, 0);
+		pos = program.getAttributeLocation("pos");
+//		program.enableVertexAttribute(posAttrib);
+//		program.pointVertexAttribute(posAttrib, 3, 6 * Float.BYTES, 0);
 
 		/* Specify Color Pointer */
-		int colAttrib = program.getAttributeLocation("color");
-		program.enableVertexAttribute(colAttrib);
-		program.pointVertexAttribute(colAttrib, 3, 6 * Float.BYTES, 3 * Float.BYTES);
+		color = program.getAttributeLocation("color");
+//		program.enableVertexAttribute(colAttrib);
+//		program.pointVertexAttribute(colAttrib, 3, 6 * Float.BYTES, 3 * Float.BYTES);
 	}
 	
 	public void setViewMatrix() {
