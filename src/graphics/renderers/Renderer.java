@@ -12,10 +12,12 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.system.MemoryStack;
 
 import files.FileManager;
+import graphics.Color;
 import graphics.State;
 import graphics.shaders.Shader;
 import graphics.shaders.ShaderProgram;
 import tensor.Matrix4;
+import tensor.Vector;
 
 public class Renderer {
 	
@@ -56,6 +58,8 @@ public class Renderer {
 		
 		setViewMatrix();
 		setProjectionMatrix();
+		setLightPos(new Vector(10, 0, -5));
+		setLightColor(Color.yellow);
 	}
 	
 	public ShaderProgram shaderProgram() {
@@ -163,6 +167,16 @@ public class Renderer {
 		Matrix4 projection = Matrix4.perspective(FOV, ratio, NEAR_PLANE, FAR_PLANE);
 		int uniProjection = program.getUniformLocation("projection");
 		program.setUniform(uniProjection, projection);
+	}
+	
+	public void setLightPos(Vector p) {
+		int uniPos = program.getUniformLocation("lightPos");
+		program.setUniform(uniPos, p);
+	}
+	
+	public void setLightColor(Color c) {
+		int uniCol = program.getUniformLocation("lightColor");
+		program.setUniform(uniCol, new Vector(c.red(), c.green(), c.blue()));
 	}
 	
 }

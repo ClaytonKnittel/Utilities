@@ -99,5 +99,15 @@ public class RigidState implements graphics.State {
 		vao.delete();
 		vbo.delete();
 	}
+	
+	@Override
+	public boolean equals(Object o) {
+		if (o == this)
+			return true;
+		if (!GLFWRenderable.class.isAssignableFrom(o.getClass()))
+			return false;
+		GLFWRenderable r = (GLFWRenderable) o;
+		return r == owner;
+	}
 
 }

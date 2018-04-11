@@ -393,9 +393,29 @@ public final class AO {
 		}
 	}
 	
+	public static void print2D(float[][] a) {
+		print2D(a, "");
+	}
+	
+	public static void print2D(float[][] a, String delimiter) {
+		for (float[] s : a) {
+			print(s, delimiter);
+		}
+	}
+	
 	public static void print(boolean[] a, String delimiter) {
 		for (boolean b : a)
 			System.out.print((b ? 1 : 0) + delimiter);
+		System.out.println();
+	}
+	
+	public static void print(float[] a) {
+		print(a, "\t");
+	}
+	
+	public static void print(float[] a, String delimiter) {
+		for (float b : a)
+			System.out.print(b + delimiter);
 		System.out.println();
 	}
 	

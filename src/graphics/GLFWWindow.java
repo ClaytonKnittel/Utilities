@@ -101,6 +101,11 @@ public class GLFWWindow {
 			this.states.add(new RigidState(g));
 	}
 	
+	public void remove(GLFWRenderable...states) {
+		for (GLFWRenderable r : states)
+			this.states.remove(r);
+	}
+	
 	/**
 	 * Call after loading shaders
 	 */

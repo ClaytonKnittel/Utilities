@@ -379,8 +379,8 @@ public class Matrix4 {
     public static Matrix4 rotate(float angle, float x, float y, float z) {
         Matrix4 rotation = new Matrix4();
 
-        float c = (float) Math.cos(Math.toRadians(angle));
-        float s = (float) Math.sin(Math.toRadians(angle));
+        float c = (float) Math.cos(angle);
+        float s = (float) Math.sin(angle);
         Vector vec = new Vector(x, y, z);
         vec.normalize();
         x = vec.x();
