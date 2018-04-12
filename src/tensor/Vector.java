@@ -32,6 +32,18 @@ public class Vector {
 		return z;
 	}
 	
+	public void x(float x) {
+		this.x = x;
+	}
+	
+	public void y(float y) {
+		this.y = y;
+	}
+	
+	public void z(float z) {
+		this.z = z;
+	}
+	
 	public void toBuffer(FloatBuffer buffer) {
         buffer.put(x).put(y).put(z);
         buffer.flip();

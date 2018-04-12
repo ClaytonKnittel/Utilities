@@ -41,6 +41,7 @@ public class RigidState implements graphics.State {
 	}
 	
 	public void update() {
+		owner.update();
 		model = owner.model();
 	}
 

@@ -167,6 +167,20 @@ public class Matrix4 {
      *
      * @return Vector product of this * other
      */
+    public Vector multiply(Vector vector) {
+        float x = this.m00 * vector.x + this.m01 * vector.y + this.m02 * vector.z;
+        float y = this.m10 * vector.x + this.m11 * vector.y + this.m12 * vector.z;
+        float z = this.m20 * vector.x + this.m21 * vector.y + this.m22 * vector.z;
+        return new Vector(x, y, z);
+    }
+
+    /**
+     * Multiplies this matrix to a vector.
+     *
+     * @param vector The vector
+     *
+     * @return Vector product of this * other
+     */
     public Vector4 multiply(Vector4 vector) {
         float x = this.m00 * vector.x + this.m01 * vector.y + this.m02 * vector.z + this.m03 * vector.w;
         float y = this.m10 * vector.x + this.m11 * vector.y + this.m12 * vector.z + this.m13 * vector.w;
@@ -343,6 +357,19 @@ public class Matrix4 {
         perspective.m33 = 0f;
 
         return perspective;
+    }
+    
+    /**
+     * 
+     * @param phi Euler angle phi
+     * @param theta Euler angle theta
+     * @param psi Euler angle psi
+     * @return The composite 3 rotations about these angles
+     */
+    public static Matrix4 eulerMatrix(float phi, float theta, float psi) {
+    	return phiRotate(phi)
+    			.multiply(thetaRotate(theta))
+    			.multiply(psiRotate(psi));
     }
     
     /**

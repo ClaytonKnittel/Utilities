@@ -1,7 +1,5 @@
 package graphics.models;
 
-import java.nio.FloatBuffer;
-
 import org.lwjgl.system.MemoryStack;
 
 import graphics.Color;
@@ -17,14 +15,19 @@ public class ModelData {
 		this.triangles = triangles;
 	}
 	
-	public float[] getData() {
+	public static void scale(float[] data, float scale) {
+		for (int i = 0; i < data.length; i++)
+			data[i] *= scale;
+	}
+	
+	public float[] getData(float scale) {
 		float[] f = new float[3 * 6 * triangles.length];
 		
 		int fLoc = 0;
 		for (int[] faces : triangles) {
 			for (int j = 0; j < 6; j += 2) {
 				for (int i = 0; i < 3; i++) {
-					f[fLoc + i] = vertices[faces[j] - 1][i]; 
+					f[fLoc + i] = vertices[faces[j] - 1][i] * scale; 
 					f[fLoc + i + 3] = normals[faces[j + 1] - 1][i];
 				}
 				fLoc += 6;
@@ -33,7 +36,7 @@ public class ModelData {
 		return f;
 	}
 	
-	public float[] getData(Color c) {
+	public float[] getData(Color c, float scale) {
 		float[] f = new float[3 * 9 * triangles.length];
 		float[] color = {c.red() / 255f, c.green() / 255f, c.blue() / 255f};
 		
@@ -41,7 +44,7 @@ public class ModelData {
 		for (int[] faces : triangles) {
 			for (int j = 0; j < 6; j += 2) {
 				for (int i = 0; i < 3; i++) {
-					f[fLoc + i] = vertices[faces[j] - 1][i]; 
+					f[fLoc + i] = vertices[faces[j] - 1][i] * scale; 
 					f[fLoc + i + 3] = normals[faces[j + 1] - 1][i];
 					f[fLoc + i + 6] = color[i];
 				}

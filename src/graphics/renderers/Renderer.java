@@ -33,7 +33,7 @@ public class Renderer {
 	
 	private static final float FOV = 72;
 	private static final float NEAR_PLANE = 0.1f;
-	private static final float FAR_PLANE = 1000f;
+	private static final float FAR_PLANE = 4000f;
 	
 	private InputVariable[] inputs;
 	private Locatable camera;
@@ -108,6 +108,7 @@ public class Renderer {
 	public void update(Iterable<State> states) {
 		for (State s : states)
 			s.update();
+		camera.update();
 		setViewMatrix();
 	}
 	
@@ -148,9 +149,8 @@ public class Renderer {
 			setDefaultViewMatrix();
 			return;
 		}
-		Matrix4 view = Matrix4.phiRotate(camera.phi())
-				.multiply(Matrix4.thetaRotate(camera.theta()))
-				.multiply(Matrix4.psiRotate(camera.psi()));
+		Matrix4 view = Matrix4.eulerMatrix(camera.phi(), camera.theta(), camera.psi())
+				.multiply(Matrix4.translate(camera.pos().times(-1)));
 		program.setUniform(uniView, view);
 	}
 	

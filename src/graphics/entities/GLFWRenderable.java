@@ -2,12 +2,7 @@ package graphics.entities;
 
 import tensor.Matrix4;
 
-public interface GLFWRenderable {
-	
-	/**
-	 * Update the graphics characteristics of this object, i.e. the model matrix
-	 */
-	void update();
+public interface GLFWRenderable extends Updatable {
 	
 	/**
 	 * 

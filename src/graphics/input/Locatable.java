@@ -1,8 +1,9 @@
 package graphics.input;
 
+import graphics.entities.Updatable;
 import tensor.Vector;
 
-public interface Locatable {
+public interface Locatable extends Updatable {
 	
 	Vector pos();
 	
