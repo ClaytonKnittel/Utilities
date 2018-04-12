@@ -344,6 +344,70 @@ public class Matrix4 {
 
         return perspective;
     }
+    
+    /**
+     * Rotation about the y-axis phi radians (is reverse because it's applied to the world).
+     * 
+     * @param phi angle to rotate about y-axis
+     * @return a rotation operator about y
+     */
+    public static Matrix4 phiRotate(float phi) {
+    	Matrix4 rotate = new Matrix4();
+    	
+    	float sin = (float) Math.sin(phi);
+    	float cos = (float) Math.cos(phi);
+    	
+    	rotate.m00 = cos;
+    	rotate.m02 = -sin;
+    	rotate.m20 = sin;
+    	rotate.m22 = cos;
+    	
+    	return rotate;
+    }
+    
+    /**
+     * Rotation about the x-axis theta radians (is reverse because it's applied to the world).
+     * 
+     * @param theta angle to rotate about x-axis
+     * @return a rotation operator about x
+     */
+    public static Matrix4 thetaRotate(float theta) {
+    	Matrix4 rotate = new Matrix4();
+    	
+    	float sin = (float) Math.sin(theta);
+    	float cos = (float) Math.cos(theta);
+    	
+    	rotate.m11 = cos;
+    	rotate.m12 = -sin;
+    	rotate.m21 = sin;
+    	rotate.m22 = cos;
+    	
+    	return rotate;
+    }
+    
+    /**
+     * Rotation about the z-axis theta radians (is reverse because it's applied to the world).
+     * 
+     * @param theta angle to rotate about z-axis
+     * @return a rotation operator about z
+     */
+    public static Matrix4 psiRotate(float psi) {
+    	Matrix4 rotate = new Matrix4();
+    	
+    	float sin = (float) Math.sin(psi);
+    	float cos = (float) Math.cos(psi);
+    	
+    	rotate.m00 = cos;
+    	rotate.m01 = -sin;
+    	rotate.m10 = sin;
+    	rotate.m11 = cos;
+    	
+    	return rotate;
+    }
+    
+    public static Matrix4 translate(Vector v) {
+    	return translate(v.x(), v.y(), v.z());
+    }
 
     /**
      * Creates a translation matrix. Similar to

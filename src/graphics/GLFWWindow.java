@@ -10,7 +10,9 @@ import org.lwjgl.glfw.GLFWKeyCallback;
 import org.lwjgl.opengl.GL;
 
 import graphics.entities.GLFWRenderable;
+import graphics.entities.LightSource;
 import graphics.input.KeyAction;
+import graphics.input.Locatable;
 import graphics.renderers.Renderer;
 
 /**
@@ -99,6 +101,15 @@ public class GLFWWindow {
 	public void add(GLFWRenderable...states) {
 		for (GLFWRenderable g : states)
 			this.states.add(new RigidState(g));
+	}
+	
+	public void add(LightSource light) {
+		this.r.setLightPos(light.pos());
+		this.r.setLightColor(light.color());
+	}
+	
+	public void add(Locatable camera) {
+		this.r.setCamera(camera);
 	}
 	
 	public void remove(GLFWRenderable...states) {

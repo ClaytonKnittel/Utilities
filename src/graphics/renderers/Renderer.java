@@ -14,6 +14,7 @@ import org.lwjgl.system.MemoryStack;
 import files.FileManager;
 import graphics.Color;
 import graphics.State;
+import graphics.input.Locatable;
 import graphics.shaders.Shader;
 import graphics.shaders.ShaderProgram;
 import tensor.Matrix4;
@@ -26,7 +27,7 @@ public class Renderer {
 	private Shader vertexShader;
 	private Shader fragmentShader;
 	
-	private static int uniModel;
+	private static int uniModel, uniView, uniProjection;
 	
 	public static final String defaultVertexShader, defaultFragmentShader;
 	
@@ -35,6 +36,7 @@ public class Renderer {
 	private static final float FAR_PLANE = 1000f;
 	
 	private InputVariable[] inputs;
+	private Locatable camera;
 	
 	static {
 		defaultVertexShader = "/Users/claytonknittel/git/Utilities/src/graphics/shaders/vertexShader";
@@ -55,11 +57,10 @@ public class Renderer {
 		program = initiateProgram(vertexShader, fragmentShader);
 		
 		uniModel = program.getUniformLocation("model");
+		uniView = program.getUniformLocation("view");
+		uniProjection = program.getUniformLocation("projection");
 		
-		setViewMatrix();
 		setProjectionMatrix();
-		setLightPos(new Vector(100, 0, 50));
-		setLightColor(Color.yellow);
 	}
 	
 	public ShaderProgram shaderProgram() {
@@ -68,6 +69,10 @@ public class Renderer {
 	
 	public InputVariable[] inputs() {
 		return inputs;
+	}
+	
+	public void setCamera(Locatable camera) {
+		this.camera = camera;
 	}
 	
 	/**
@@ -103,6 +108,7 @@ public class Renderer {
 	public void update(Iterable<State> states) {
 		for (State s : states)
 			s.update();
+		setViewMatrix();
 	}
 	
 	public void render(Iterable<State> states) {
@@ -136,21 +142,20 @@ public class Renderer {
 	public void exit() {
 		program.delete();
 	}
-
-	/**
-	 * Specifies the vertex attributes.
-	 */
-//	private void configureAttributeLocations() {
-//		/* Specify Vertex Pointer */
-//		pos = program.getAttributeLocation("pos");
-//
-//		/* Specify Color Pointer */
-//		color = program.getAttributeLocation("color");
-//	}
 	
-	public void setViewMatrix() {
+	private void setViewMatrix() {
+		if (camera == null) {
+			setDefaultViewMatrix();
+			return;
+		}
+		Matrix4 view = Matrix4.phiRotate(camera.phi())
+				.multiply(Matrix4.thetaRotate(camera.theta()))
+				.multiply(Matrix4.psiRotate(camera.psi()));
+		program.setUniform(uniView, view);
+	}
+	
+	private void setDefaultViewMatrix() {
 		Matrix4 view = new Matrix4();
-		int uniView = program.getUniformLocation("view");
 		program.setUniform(uniView, view);
 	}
 	
@@ -165,7 +170,6 @@ public class Renderer {
 		}
 		
 		Matrix4 projection = Matrix4.perspective(FOV, ratio, NEAR_PLANE, FAR_PLANE);
-		int uniProjection = program.getUniformLocation("projection");
 		program.setUniform(uniProjection, projection);
 	}
 	
@@ -176,7 +180,7 @@ public class Renderer {
 	
 	public void setLightColor(Color c) {
 		int uniCol = program.getUniformLocation("lightColor");
-		program.setUniform(uniCol, new Vector(c.red(), c.green(), c.blue()));
+		program.setUniform(uniCol, new Vector(c.redf(), c.greenf(), c.bluef()));
 	}
 	
 }
