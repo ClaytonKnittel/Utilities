@@ -13,6 +13,8 @@ public class Color {
 	public static final Color gray = new Color(0xff808080);
 	public static final Color cyan = new Color(0xff00ffff);
 	
+	public static final Color matte_blue = new Color(0xff0099ff);
+	
 	private int val;
 	
 	public Color(int val) {
@@ -41,6 +43,22 @@ public class Color {
 	
 	public int alpha() {
 		return val >>> 24;
+	}
+	
+	public float redf() {
+		return red() / 255f;
+	}
+	
+	public float greenf() {
+		return green() / 255f;
+	}
+	
+	public float bluef() {
+		return blue() / 255f;
+	}
+	
+	public float alphaf() {
+		return alpha() / 255f;
 	}
 	
 	public int val() {

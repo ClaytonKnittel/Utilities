@@ -5,7 +5,7 @@ in vec3 norm;
 in vec3 color;
 /* in vec2 texcoord; */
 
-out vec3 vertexColor;
+out vec4 vertexColor;
 out vec3 toLightPos;
 out vec3 surfaceNorm;
 /* out vec2 textureCoord; */
@@ -17,7 +17,7 @@ uniform vec3 lightPos;
 
 void main() {
 	vec4 worldPos = model * vec4(pos, 1.0);
-	vertexColor = color;
+	vertexColor = vec4(color, 1.0);
 	toLightPos = lightPos - worldPos.xyz;
 	surfaceNorm = (model * vec4(norm, 0)).xyz;
 	

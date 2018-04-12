@@ -8,9 +8,9 @@ public final class VBOConverter {
 			ret[2 * x] = vertices[x];
 			ret[2 * x + 1] = vertices[x + 1];
 			ret[2 * x + 2] = vertices[x + 2];
-			ret[2 * x + 3] = color.red();
-			ret[2 * x + 4] = color.green();
-			ret[2 * x + 5] = color.blue();
+			ret[2 * x + 3] = color.redf();
+			ret[2 * x + 4] = color.greenf();
+			ret[2 * x + 5] = color.bluef();
 		}
 		return ret;
 	}
@@ -24,9 +24,9 @@ public final class VBOConverter {
 			ret[3 * x / 2 + 3] = verticesAndNorms[x + 3];
 			ret[3 * x / 2 + 4] = verticesAndNorms[x + 4];
 			ret[3 * x / 2 + 5] = verticesAndNorms[x + 5];
-			ret[3 * x / 2 + 6] = color.red();
-			ret[3 * x / 2 + 7] = color.green();
-			ret[3 * x / 2 + 8] = color.blue();
+			ret[3 * x / 2 + 6] = color.redf();
+			ret[3 * x / 2 + 7] = color.greenf();
+			ret[3 * x / 2 + 8] = color.bluef();
 		}
 		return ret;
 	}

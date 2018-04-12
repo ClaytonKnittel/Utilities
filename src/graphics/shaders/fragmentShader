@@ -1,6 +1,6 @@
 #version 150 core
 
-in vec3 vertexColor;
+in vec4 vertexColor;
 in vec3 toLightPos;
 in vec3 surfaceNorm;
 /* in vec2 textureCoord; */
@@ -17,10 +17,19 @@ void main() {
 	
 	float nDot = dot(nLight, nSurf);
 	float brightness = max(nDot, 0.1f);
-	/* vec3 diffuse = brightness * lightColor; */
-	vec3 diffuse = vec3(brightness, 0, 0);
+	vec4 diffuse = brightness * vertexColor;
 	
 	/* vec4 textureColor = texture(texImage, textureCoord); */
 	/* fragColor = vec4(diffuse, 1.0) * vec4(vertexColor, 1.0); */ /* * textureColor; */
-	fragColor = vec4(diffuse, 1); /* * vec4(vertexColor, 1); */
+	fragColor = diffuse; /* * vec4(vertexColor, 1); */
 }
+
+
+/*
+ * gl_FragCoord, contains x, y, z, w
+ * 
+ * xf, yf coords on screen
+ * zf distance from screen
+ 
+ * 
+ */

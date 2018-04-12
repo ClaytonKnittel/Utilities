@@ -58,7 +58,7 @@ public class Renderer {
 		
 		setViewMatrix();
 		setProjectionMatrix();
-		setLightPos(new Vector(10, 0, -5));
+		setLightPos(new Vector(100, 0, 50));
 		setLightColor(Color.yellow);
 	}
 	
