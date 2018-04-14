@@ -366,6 +366,12 @@ public class Matrix4 {
      * @param psi Euler angle psi
      * @return The composite 3 rotations about these angles
      */
+    public static Matrix4 cameraRotateMatrix(float phi, float theta, float psi) {
+    	return psiRotate(psi)
+    			.multiply(thetaRotate(theta))
+    			.multiply(phiRotate(phi));
+    }
+    
     public static Matrix4 eulerMatrix(float phi, float theta, float psi) {
     	return phiRotate(phi)
     			.multiply(thetaRotate(theta))
@@ -385,8 +391,8 @@ public class Matrix4 {
     	float cos = (float) Math.cos(phi);
     	
     	rotate.m00 = cos;
-    	rotate.m02 = -sin;
-    	rotate.m20 = sin;
+    	rotate.m02 = sin;
+    	rotate.m20 = -sin;
     	rotate.m22 = cos;
     	
     	return rotate;
@@ -490,6 +496,14 @@ public class Matrix4 {
 
         return rotation;
     }
+    
+    public static Matrix4 model(float x, float y, float z, float phi, float theta, float psi) {
+    	return translate(x, y, z).multiply(Matrix4.eulerMatrix(phi, -theta, psi));
+    }
+    
+    public static Matrix4 model(Vector v, float phi, float theta, float psi) {
+    	return model(v.x(), v.y(), v.z(), phi, theta, psi);
+    }
 
     /**
      * Creates a scaling matrix. Similar to <code>glScale(x, y, z)</code>.
@@ -508,6 +522,10 @@ public class Matrix4 {
         scaling.m22 = z;
 
         return scaling;
+    }
+    
+    public static Matrix4 scale(float s) {
+    	return scale(s, s, s);
     }
     
     @Override

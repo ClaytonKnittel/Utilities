@@ -20,14 +20,14 @@ public class ModelData {
 			data[i] *= scale;
 	}
 	
-	public float[] getData(float scale) {
+	public float[] getData() {
 		float[] f = new float[3 * 6 * triangles.length];
 		
 		int fLoc = 0;
 		for (int[] faces : triangles) {
 			for (int j = 0; j < 6; j += 2) {
 				for (int i = 0; i < 3; i++) {
-					f[fLoc + i] = vertices[faces[j] - 1][i] * scale; 
+					f[fLoc + i] = vertices[faces[j] - 1][i]; 
 					f[fLoc + i + 3] = normals[faces[j + 1] - 1][i];
 				}
 				fLoc += 6;

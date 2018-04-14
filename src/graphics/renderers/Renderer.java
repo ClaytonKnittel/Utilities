@@ -149,7 +149,7 @@ public class Renderer {
 			setDefaultViewMatrix();
 			return;
 		}
-		Matrix4 view = Matrix4.eulerMatrix(camera.phi(), camera.theta(), camera.psi())
+		Matrix4 view = Matrix4.cameraRotateMatrix(-camera.phi(), -camera.theta(), -camera.psi())
 				.multiply(Matrix4.translate(camera.pos().times(-1)));
 		program.setUniform(uniView, view);
 	}

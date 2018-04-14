@@ -16,7 +16,7 @@ void main() {
 	vec3 nSurf = normalize(surfaceNorm);
 	
 	float nDot = dot(nLight, nSurf);
-	float brightness = max(nDot, 0.1f);
+	float brightness = max(nDot, 0.2f);
 	vec4 diffuse = brightness * vec4(lightColor, 1);
 	
 	/* vec4 textureColor = texture(texImage, textureCoord); */

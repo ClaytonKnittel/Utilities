@@ -19,6 +19,10 @@ public class Vector2 {
 		this(v.x, v.y);
 	}
 	
+	public Vector2(Vector v) {
+		this(v.x, v.y);
+	}
+	
 	public float x() {
 		return x;
 	}
