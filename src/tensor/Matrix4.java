@@ -385,6 +385,8 @@ public class Matrix4 {
 
 	/**
 	 * 
+	 * rotate z - x - y
+	 * 
 	 * @param phi
 	 *            Euler angle phi
 	 * @param theta
@@ -394,26 +396,25 @@ public class Matrix4 {
 	 * @return The composite 3 rotations about these angles
 	 */
 	public static Matrix4 cameraRotateMatrix(float phi, float theta, float psi) {
-		return psiRotate(psi).multiply(thetaRotate(theta)).multiply(phiRotate(phi));
+		return zRotate(psi).multiply(xRotate(theta)).multiply(yRotate(phi));
 	}
 
 	public static Matrix4 eulerMatrix(float phi, float theta, float psi) {
-		return phiRotate(phi).multiply(thetaRotate(theta)).multiply(psiRotate(psi));
+		return yRotate(phi).multiply(xRotate(theta)).multiply(zRotate(psi));
 	}
 
 	/**
-	 * Rotation about the y-axis phi radians (is reverse because it's applied to
-	 * the world).
+	 * Rotation about the y-axis phi radians.
 	 * 
 	 * @param phi
 	 *            angle to rotate about y-axis
 	 * @return a rotation operator about y
 	 */
-	public static Matrix4 phiRotate(float phi) {
+	public static Matrix4 yRotate(float angle) {
 		Matrix4 rotate = new Matrix4();
 
-		float sin = (float) Math.sin(phi);
-		float cos = (float) Math.cos(phi);
+		float sin = (float) Math.sin(angle);
+		float cos = (float) Math.cos(angle);
 
 		rotate.m00 = cos;
 		rotate.m02 = sin;
@@ -424,18 +425,17 @@ public class Matrix4 {
 	}
 
 	/**
-	 * Rotation about the x-axis theta radians (is reverse because it's applied
-	 * to the world).
+	 * Rotation about the x-axis theta radians.
 	 * 
 	 * @param theta
 	 *            angle to rotate about x-axis
 	 * @return a rotation operator about x
 	 */
-	public static Matrix4 thetaRotate(float theta) {
+	public static Matrix4 xRotate(float angle) {
 		Matrix4 rotate = new Matrix4();
 
-		float sin = (float) Math.sin(theta);
-		float cos = (float) Math.cos(theta);
+		float sin = (float) Math.sin(angle);
+		float cos = (float) Math.cos(angle);
 
 		rotate.m11 = cos;
 		rotate.m12 = -sin;
@@ -446,18 +446,17 @@ public class Matrix4 {
 	}
 
 	/**
-	 * Rotation about the z-axis theta radians (is reverse because it's applied
-	 * to the world).
+	 * Rotation about the z-axis theta radians.
 	 * 
 	 * @param theta
 	 *            angle to rotate about z-axis
 	 * @return a rotation operator about z
 	 */
-	public static Matrix4 psiRotate(float psi) {
+	public static Matrix4 zRotate(float angle) {
 		Matrix4 rotate = new Matrix4();
 
-		float sin = (float) Math.sin(psi);
-		float cos = (float) Math.cos(psi);
+		float sin = (float) Math.sin(angle);
+		float cos = (float) Math.cos(angle);
 
 		rotate.m00 = cos;
 		rotate.m01 = -sin;
