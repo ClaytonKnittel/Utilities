@@ -399,8 +399,16 @@ public class Matrix4 {
 		return zRotate(psi).multiply(xRotate(theta)).multiply(yRotate(phi));
 	}
 
+	/**
+	 * used to transform bodies to space coordinates.
+	 * 
+	 * @param phi
+	 * @param theta
+	 * @param psi
+	 * @return
+	 */
 	public static Matrix4 eulerMatrix(float phi, float theta, float psi) {
-		return yRotate(phi).multiply(xRotate(theta)).multiply(zRotate(psi));
+		return zRotate(phi).multiply(yRotate(theta)).multiply(zRotate(psi));
 	}
 
 	/**
@@ -533,7 +541,7 @@ public class Matrix4 {
 	}
 
 	public static Matrix4 model(float x, float y, float z, float phi, float theta, float psi) {
-		return translate(x, y, z).multiply(Matrix4.eulerMatrix(phi, -theta, psi));
+		return translate(x, y, z).multiply(Matrix4.eulerMatrix(phi, theta, psi));
 	}
 
 	public static Matrix4 model(Vector v, float phi, float theta, float psi) {

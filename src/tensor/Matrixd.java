@@ -208,6 +208,69 @@ public class Matrixd {
 	}
 
 	/**
+	 * Rotation about the y-axis phi radians.
+	 * 
+	 * @param phi
+	 *            angle to rotate about y-axis
+	 * @return a rotation operator about y
+	 */
+	public static Matrixd yRotate(double angle) {
+		Matrixd rotate = new Matrixd();
+
+		double sin = Math.sin(angle);
+		double cos = Math.cos(angle);
+
+		rotate.m00 = cos;
+		rotate.m02 = sin;
+		rotate.m20 = -sin;
+		rotate.m22 = cos;
+
+		return rotate;
+	}
+
+	/**
+	 * Rotation about the x-axis theta radians.
+	 * 
+	 * @param theta
+	 *            angle to rotate about x-axis
+	 * @return a rotation operator about x
+	 */
+	public static Matrixd xRotate(double angle) {
+		Matrixd rotate = new Matrixd();
+
+		double sin = Math.sin(angle);
+		double cos = Math.cos(angle);
+
+		rotate.m11 = cos;
+		rotate.m12 = -sin;
+		rotate.m21 = sin;
+		rotate.m22 = cos;
+
+		return rotate;
+	}
+
+	/**
+	 * Rotation about the z-axis theta radians.
+	 * 
+	 * @param theta
+	 *            angle to rotate about z-axis
+	 * @return a rotation operator about z
+	 */
+	public static Matrixd zRotate(double angle) {
+		Matrixd rotate = new Matrixd();
+
+		double sin = Math.sin(angle);
+		double cos = Math.cos(angle);
+
+		rotate.m00 = cos;
+		rotate.m01 = -sin;
+		rotate.m10 = sin;
+		rotate.m11 = cos;
+
+		return rotate;
+	}
+
+	/**
 	 * Creates a rotation matrix. Similar to
 	 * <code>glRotate(angle, x, y, z)</code>.
 	 *
@@ -271,27 +334,44 @@ public class Matrixd {
 	}
 
 	public static Matrixd toRotatingFrame(double phi, double theta, double psi) {
-		float st = (float) Math.sin(theta);
-		float ct = (float) Math.cos(theta);
-		float sp = (float) Math.sin(phi);
-		float cp = (float) Math.cos(phi);
-
-		return Matrixd.rotate(phi, 0, 0, 1).multiply(Matrixd.rotate(theta, -sp, cp, 0))
-				.multiply(Matrixd.rotate(psi, cp * st, sp * st, ct));
+//		float st = (float) Math.sin(theta);
+//		float ct = (float) Math.cos(theta);
+//		float sp = (float) Math.sin(phi);
+//		float cp = (float) Math.cos(phi);
+//
+//		return Matrixd.rotate(phi, 0, 0, 1).multiply(Matrixd.rotate(theta, -sp, cp, 0))
+//				.multiply(Matrixd.rotate(psi, cp * st, sp * st, ct));
+		return Matrixd.zRotate(-psi).multiply(Matrixd.yRotate(-theta)).multiply(Matrixd.zRotate(-phi));
 	}
 
 	public static Matrixd toSpaceFrame(double phi, double theta, double psi) {
-		phi *= -1;
-		theta *= -1;
-		psi *= -1;
-
-		float st = (float) Math.sin(theta);
-		float ct = (float) Math.cos(theta);
-		float sp = (float) Math.sin(phi);
-		float cp = (float) Math.cos(phi);
-
-		return Matrixd.rotate(psi, cp * st, sp * st, ct).multiply(Matrixd.rotate(theta, -sp, cp, 0))
-				.multiply(Matrixd.rotate(phi, 0, 0, 1));
+//		phi *= -1;
+//		theta *= -1;
+//		psi *= -1;
+//
+//		float st = (float) Math.sin(theta);
+//		float ct = (float) Math.cos(theta);
+//		float sp = (float) Math.sin(phi);
+//		float cp = (float) Math.cos(phi);
+//
+//		return Matrixd.rotate(psi, cp * st, sp * st, ct).multiply(Matrixd.rotate(theta, -sp, cp, 0))
+//				.multiply(Matrixd.rotate(phi, 0, 0, 1));
+		return Matrixd.zRotate(phi).multiply(Matrixd.yRotate(theta)).multiply(Matrixd.zRotate(psi));
 	}
-
+	
+	public String toString() {
+		return "" + m00 + "\t" + m01 + "\t" + m02 + "\n" + 
+				m10 + "\t" + m11 + "\t" + m12 + "\n" + 
+				m20 + "\t" + m21 + "\t" + m22 + "\n";
+	}
+	
+	public String roundString() {
+		return "" + round(m00) + "\t" + round(m01) + "\t" + round(m02) + "\n" + 
+				round(m10) + "\t" + round(m11) + "\t" + round(m12) + "\n" + 
+				round(m20) + "\t" + round(m21) + "\t" + round(m22) + "\n";
+	}
+	
+	private static float round(double d) {
+		return Math.round(1000 * d) / 1000f;
+	}
 }
