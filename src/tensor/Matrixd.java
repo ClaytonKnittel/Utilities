@@ -332,6 +332,10 @@ public class Matrixd {
 
 		return scaling;
 	}
+	
+	public static Matrixd toRotatingFrame(DVector d) {
+		return toRotatingFrame(d.x(), d.y(), d.z());
+	}
 
 	public static Matrixd toRotatingFrame(double phi, double theta, double psi) {
 //		float st = (float) Math.sin(theta);
@@ -342,6 +346,10 @@ public class Matrixd {
 //		return Matrixd.rotate(phi, 0, 0, 1).multiply(Matrixd.rotate(theta, -sp, cp, 0))
 //				.multiply(Matrixd.rotate(psi, cp * st, sp * st, ct));
 		return Matrixd.zRotate(-psi).multiply(Matrixd.yRotate(-theta)).multiply(Matrixd.zRotate(-phi));
+	}
+	
+	public static Matrixd toSpaceFrame(DVector d) {
+		return toSpaceFrame(d.x(), d.y(), d.z());
 	}
 
 	public static Matrixd toSpaceFrame(double phi, double theta, double psi) {
