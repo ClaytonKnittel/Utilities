@@ -20,7 +20,7 @@ public interface State {
 	 * Renders to the screen
 	 * @param alpha what percentage of the way through this frame we are
 	 */
-	void render(ShaderProgram program, int uniModel);
+	void render(ShaderProgram program, int uniModel, int uniReflectivity, int uniShineDamper);
 	
 	/**
 	 * Closes resources associated with this state

@@ -45,10 +45,12 @@ public class RigidState implements graphics.State {
 		model = owner.model();
 	}
 
-	public void render(ShaderProgram program, int uniModel) {
+	public void render(ShaderProgram program, int uniModel, int uniReflectivity, int uniShineDamper) {
 		vao.bind();
 		
 		program.setUniform(uniModel, model);
+		program.setUniform(uniReflectivity, owner.reflectivity());
+		program.setUniform(uniShineDamper, owner.shineDamper());
 
 		glDrawArrays(GL_TRIANGLES, 0, numVertices);
 	}

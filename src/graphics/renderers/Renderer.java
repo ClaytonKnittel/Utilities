@@ -28,6 +28,7 @@ public class Renderer {
 	private Shader fragmentShader;
 	
 	private static int uniModel, uniView, uniProjection;
+	private static int uniReflectivity, uniShineDamper;
 	
 	public static final String defaultVertexShader, defaultFragmentShader;
 	
@@ -59,6 +60,9 @@ public class Renderer {
 		uniModel = program.getUniformLocation("model");
 		uniView = program.getUniformLocation("view");
 		uniProjection = program.getUniformLocation("projection");
+		
+		uniReflectivity = program.getUniformLocation("reflectivity");
+		uniShineDamper = program.getUniformLocation("shineDamper");
 		
 		setProjectionMatrix();
 	}
@@ -118,7 +122,7 @@ public class Renderer {
 		
 		program.use();
 		for (State s : states)
-			s.render(program, uniModel);
+			s.render(program, uniModel, uniReflectivity, uniShineDamper);
 	}
 	
 	public ShaderProgram initiateProgram(Shader vertexShader, Shader fragmentShader) {
