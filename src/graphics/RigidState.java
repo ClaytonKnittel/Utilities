@@ -39,15 +39,15 @@ public class RigidState implements graphics.State {
 	protected RigidState(GLFWRenderable r) {
 		this(r.modelData());
 		this.owner = r;
+		init();
 	}
 	
 	private RigidState(float[] shapeData) {
 		this.shapeData = FloatBuffer.wrap(shapeData);
-		init();
 	}
 	
 	private void init() {
-		this.texture = Texture.loadTexture(owner.texture());
+		this.texture = Texture.loadTexture(Texture.path + owner.texture() + ".jpg");
 	}
 	
 	public void update() {

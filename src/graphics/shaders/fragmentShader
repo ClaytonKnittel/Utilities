@@ -4,8 +4,7 @@
 in vec3 toLightPos;
 in vec3 surfaceNorm;
 in vec3 worldPosition;
-/* position of fragment relative to screen */
-
+	/* position of fragment relative to screen */
 in vec2 textureCoord;
 
 out vec4 fragColor;
@@ -30,7 +29,7 @@ void main() {
 	factor = pow(factor, shineDamper);
 	
 	vec4 textureColor = texture(texImage, textureCoord);
-	fragColor = diffuse * vec4(textureColor, 1) + reflectivity * vec4(factor * lightColor, 1);
+	fragColor = diffuse * textureColor + reflectivity * vec4(factor * lightColor, 1);
 }
 
 

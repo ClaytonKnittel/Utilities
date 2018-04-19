@@ -31,4 +31,19 @@ public final class VBOConverter {
 		return ret;
 	}
 	
+	public static float[] toPosNormTexture(float[] verticesAndNorms) {
+		float[] ret = new float[verticesAndNorms.length * 4 / 3];
+		for (int x = 0; x < verticesAndNorms.length; x += 6) {
+			ret[4 * x / 3] = verticesAndNorms[x];
+			ret[4 * x / 3 + 1] = verticesAndNorms[x + 1];
+			ret[4 * x / 3 + 2] = verticesAndNorms[x + 2];
+			ret[4 * x / 3 + 3] = verticesAndNorms[x + 3];
+			ret[4 * x / 3 + 4] = verticesAndNorms[x + 4];
+			ret[4 * x / 3 + 5] = verticesAndNorms[x + 5];
+			ret[4 * x / 3 + 6] = 0;
+			ret[4 * x / 3 + 7] = 0;
+		}
+		return ret;
+	}
+	
 }
