@@ -6,6 +6,8 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import arrays.AO;
@@ -79,8 +81,8 @@ public class FileManager {
 	}
 	
 	private static String[] read(FileReader reader) {
-		String[] ret = new String[1];
-		ret[0] = "";
+		LinkedList<String> ret = new LinkedList<String>();
+		ret.add("");
 		int c = 0;
 		do {
 			try {
@@ -91,13 +93,15 @@ public class FileManager {
 			case -1:
 				break;
 			case 10:
-				ret = (String[]) AO.append(ret, "");
+				ret.add("");
 				break;
 			default:
-				ret[ret.length - 1] += Character.toString((char) c);
+				ret.set(ret.size() - 1, ret.get(ret.size() - 1) + Character.toString((char) c));
 			}
 		} while (c != -1);
-		return ret;
+		String[] rert = new String[ret.size()];
+		ret.toArray(rert);
+		return rert;
 	}
 	
 	private static String[] read(FileReader reader, int len) {

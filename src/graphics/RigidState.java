@@ -57,20 +57,28 @@ public class RigidState implements graphics.State {
 	
 	private void instantiateVBO(FloatBuffer buffer) {
 		FloatBuffer vertices;
-		try (MemoryStack stack = MemoryStack.stackPush()) {
-			vertices = stack.mallocFloat(buffer.limit());
-			for (int i = 0; i < vertices.capacity(); i++) {
-				vertices.put(buffer.get());
+		try {
+			try (MemoryStack stack = MemoryStack.stackPush()) {
+				vertices = stack.mallocFloat(buffer.limit());
+				for (int i = 0; i < vertices.capacity(); i++) {
+					vertices.put(buffer.get());
+				}
+				numVertices = buffer.limit() / numAttributes;
+				
+				vertices.flip();
+				
+				vbo = new VertexBufferObject();
+				vbo.bind(GL_ARRAY_BUFFER);
+				vbo.uploadData(GL_ARRAY_BUFFER, vertices, GL_STATIC_DRAW);
+				
+				vertices.clear();
 			}
-			numVertices = buffer.limit() / numAttributes;
-			
-			vertices.flip();
-			
+		} catch (java.lang.OutOfMemoryError e) {
 			vbo = new VertexBufferObject();
 			vbo.bind(GL_ARRAY_BUFFER);
-			vbo.uploadData(GL_ARRAY_BUFFER, vertices, GL_STATIC_DRAW);
+			vbo.uploadData(GL_ARRAY_BUFFER, buffer, GL_STATIC_DRAW);
 		}
-		vertices.clear();
+		buffer.clear();
 	}
 
 	public void enter(Renderer r) {

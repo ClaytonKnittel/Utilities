@@ -84,6 +84,10 @@ public class DVector {
 	}
 	
 	
+	public DVector prod(DVector v) {
+		return new DVector(x * v.x, y * v.y, z * v.z);
+	}
+	
 	public double dot(DVector v) {
 		return x * v.x + y * v.y + z * v.z;
 	}

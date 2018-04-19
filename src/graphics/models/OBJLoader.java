@@ -9,6 +9,7 @@ public class OBJLoader {
 	private static final String face = "f";
 	
 	public static ModelData loadVertexNormOBJ(String path) {
+		
 		String[] data = FileManager.toString(path);
 		
 		float[][] vertices;
