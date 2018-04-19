@@ -64,6 +64,8 @@ public class Renderer {
 		uniReflectivity = program.getUniformLocation("reflectivity");
 		uniShineDamper = program.getUniformLocation("shineDamper");
 		
+		// uniTexture = program.getUniformLocation("texImage");
+		
 		setProjectionMatrix();
 	}
 	

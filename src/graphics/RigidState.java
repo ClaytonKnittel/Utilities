@@ -6,17 +6,22 @@ import graphics.entities.VertexBufferObject;
 import graphics.renderers.InputVariable;
 import graphics.renderers.Renderer;
 import graphics.shaders.ShaderProgram;
+import graphics.shaders.Texture;
 import tensor.Matrix4;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL15.*;
 
 import java.nio.FloatBuffer;
+
+import static org.lwjgl.opengl.GL13.*;
+
 import org.lwjgl.system.MemoryStack;
 
 public class RigidState implements graphics.State {
 	
 	private GLFWRenderable owner;
+	private Texture texture;
 	
 	private FloatBuffer shapeData;
 
@@ -38,6 +43,11 @@ public class RigidState implements graphics.State {
 	
 	private RigidState(float[] shapeData) {
 		this.shapeData = FloatBuffer.wrap(shapeData);
+		init();
+	}
+	
+	private void init() {
+		this.texture = Texture.loadTexture(owner.texture());
 	}
 	
 	public void update() {
@@ -51,7 +61,9 @@ public class RigidState implements graphics.State {
 		program.setUniform(uniModel, model);
 		program.setUniform(uniReflectivity, owner.reflectivity());
 		program.setUniform(uniShineDamper, owner.shineDamper());
-
+		glActiveTexture(GL_TEXTURE0);
+		texture.bind();
+		
 		glDrawArrays(GL_TRIANGLES, 0, numVertices);
 	}
 	

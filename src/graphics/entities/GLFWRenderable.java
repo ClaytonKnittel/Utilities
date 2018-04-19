@@ -20,4 +20,6 @@ public interface GLFWRenderable extends Updatable {
 	
 	void setLightAttribs(float reflectivity, float shineDamper);
 	
+	String texture();
+	
 }
