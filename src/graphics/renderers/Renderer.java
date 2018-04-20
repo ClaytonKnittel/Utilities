@@ -1,31 +1,18 @@
 package graphics.renderers;
 
-import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL20.GL_FRAGMENT_SHADER;
-import static org.lwjgl.opengl.GL20.GL_VERTEX_SHADER;
-
-import java.io.IOException;
 import java.nio.IntBuffer;
 
 import org.lwjgl.glfw.GLFW;
-import org.lwjgl.opengl.GL11;
 import org.lwjgl.system.MemoryStack;
 
-import files.FileManager;
 import graphics.Color;
 import graphics.State;
-import graphics.input.Locatable;
-import graphics.shaders.Shader;
+import graphics.input.Observer;
 import graphics.shaders.ShaderProgram;
 import tensor.Matrix4;
 import tensor.Vector;
 
-public class Renderer {
-	
-	private ShaderProgram program;
-	
-	private Shader vertexShader;
-	private Shader fragmentShader;
+public class Renderer extends AbstractRenderer {
 	
 	private static int uniModel, uniView, uniProjection;
 	private static int uniReflectivity, uniShineDamper;
@@ -37,7 +24,6 @@ public class Renderer {
 	private static final float FAR_PLANE = 4000f;
 	
 	private InputVariable[] inputs;
-	private Locatable camera;
 	
 	static {
 		defaultVertexShader = "/Users/claytonknittel/git/Utilities/src/graphics/shaders/vertexShader";
@@ -45,40 +31,21 @@ public class Renderer {
 	}
 	
 	public Renderer() {
-		this(defaultVertexShader, defaultFragmentShader);
+		super(defaultVertexShader, defaultFragmentShader, true);
 	}
 	
-	public Renderer(String vertexShaderLoc, String fragmentShaderLoc) {
-		glEnable(GL_CULL_FACE);
-		glCullFace(GL_BACK);
-
-		vertexShader = Shader.createShader(GL_VERTEX_SHADER, fileToStr(defaultVertexShader));
-		fragmentShader = Shader.createShader(GL_FRAGMENT_SHADER, fileToStr(defaultFragmentShader));
-		
-		program = initiateProgram(vertexShader, fragmentShader);
-		
+	@Override
+	public void loadUniformVariables(ShaderProgram program) {
 		uniModel = program.getUniformLocation("model");
 		uniView = program.getUniformLocation("view");
 		uniProjection = program.getUniformLocation("projection");
 		
 		uniReflectivity = program.getUniformLocation("reflectivity");
 		uniShineDamper = program.getUniformLocation("shineDamper");
-		
-		// uniTexture = program.getUniformLocation("texImage");
-		
-		setProjectionMatrix();
-	}
-	
-	public ShaderProgram shaderProgram() {
-		return program;
 	}
 	
 	public InputVariable[] inputs() {
 		return inputs;
-	}
-	
-	public void setCamera(Locatable camera) {
-		this.camera = camera;
 	}
 	
 	/**
@@ -94,7 +61,7 @@ public class Renderer {
 			throw new IllegalArgumentException("number of names and sizes need to be the same, but were " + name.length + " and " + sizes.length);
 		
 		for (int i = 0; i < sizes.length; i++)
-			inputs[i] = new InputVariable(program.getAttributeLocation(name[i]), name[i], sizes[i]);
+			inputs[i] = new InputVariable(program().getAttributeLocation(name[i]), name[i], sizes[i]);
 	}
 	
 	/**
@@ -112,60 +79,26 @@ public class Renderer {
 	
 	
 	public void update(Iterable<State> states) {
+		super.update();
 		for (State s : states)
 			s.update();
-		camera.update();
-		setViewMatrix();
 	}
 	
 	public void render(Iterable<State> states) {
-		GL11.glEnable(GL11.GL_DEPTH_TEST);
-		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
-		
-		program.use();
+		super.render();
 		for (State s : states)
-			s.render(program, uniModel, uniReflectivity, uniShineDamper);
+			s.render(program(), uniModel, uniReflectivity, uniShineDamper);
 	}
 	
-	public ShaderProgram initiateProgram(Shader vertexShader, Shader fragmentShader) {
-		ShaderProgram program = new ShaderProgram();
-		program.attachShader(vertexShader);
-		program.attachShader(fragmentShader);
-		program.bindFragmentDataLocation(0, "fragColor");
-		program.link();
-		program.use();
-		return program;
-	}
-	
-	public static String fileToStr(String location) {
-		try {
-			return FileManager.readAll(location);
-		} catch (IOException e) {
-			e.printStackTrace();
-			return "";
-		}
-	}
-	
-	public void exit() {
-		program.delete();
-	}
-	
-	private void setViewMatrix() {
-		if (camera == null) {
-			setDefaultViewMatrix();
-			return;
-		}
+	@Override
+	protected void setViewMatrix(Observer camera) {
 		Matrix4 view = Matrix4.cameraRotateMatrix(-camera.phi(), -camera.theta(), -camera.psi())
 				.multiply(Matrix4.translate(camera.pos().times(-1)));
-		program.setUniform(uniView, view);
+		program().setUniform(uniView, view);
 	}
 	
-	private void setDefaultViewMatrix() {
-		Matrix4 view = new Matrix4();
-		program.setUniform(uniView, view);
-	}
-	
-	public void setProjectionMatrix() {
+	@Override
+	public void setProjectionMatrix(ShaderProgram program) {
 		float ratio;
 		try (MemoryStack stack = MemoryStack.stackPush()) {
 			long window = GLFW.glfwGetCurrentContext();
@@ -180,13 +113,13 @@ public class Renderer {
 	}
 	
 	public void setLightPos(Vector p) {
-		int uniPos = program.getUniformLocation("lightPos");
-		program.setUniform(uniPos, p);
+		int uniPos = program().getUniformLocation("lightPos");
+		program().setUniform(uniPos, p);
 	}
 	
 	public void setLightColor(Color c) {
-		int uniCol = program.getUniformLocation("lightColor");
-		program.setUniform(uniCol, new Vector(c.redf(), c.greenf(), c.bluef()));
+		int uniCol = program().getUniformLocation("lightColor");
+		program().setUniform(uniCol, new Vector(c.redf(), c.greenf(), c.bluef()));
 	}
 	
 }

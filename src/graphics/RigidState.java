@@ -33,7 +33,7 @@ public class RigidState implements graphics.State {
 	// Keep a reference to the GLFWRenderable's model matrix
 	private Matrix4 model;
 	
-	// total number of attributes, usually 3 for position, 4 for color, etc
+	// total number of attributes, usually 3 for position, 3 for color, etc
 	private int numAttributes;
 	
 	protected RigidState(GLFWRenderable r) {
@@ -107,7 +107,7 @@ public class RigidState implements graphics.State {
 	}
 	
 	private void specifyVertexAttributes(Renderer r) {
-		ShaderProgram p = r.shaderProgram();
+		ShaderProgram p = r.program();
 		
 		int offset = 0;
 		
@@ -121,6 +121,7 @@ public class RigidState implements graphics.State {
 	public void exit() {
 		vao.delete();
 		vbo.delete();
+		texture.delete();
 	}
 	
 	@Override

@@ -15,6 +15,7 @@ public final class VBOConverter {
 		return ret;
 	}
 	
+	@Deprecated
 	public static float[] toPosNormColor(float[] verticesAndNorms, Color color) {
 		float[] ret = new float[verticesAndNorms.length * 3 / 2];
 		for (int x = 0; x < verticesAndNorms.length; x += 6) {
@@ -31,7 +32,7 @@ public final class VBOConverter {
 		return ret;
 	}
 	
-	public static float[] toPosNormTexture(float[] verticesAndNorms) {
+	public static float[] toPosNormColor(float[] verticesAndNorms) {
 		float[] ret = new float[verticesAndNorms.length * 4 / 3];
 		for (int x = 0; x < verticesAndNorms.length; x += 6) {
 			ret[4 * x / 3] = verticesAndNorms[x];

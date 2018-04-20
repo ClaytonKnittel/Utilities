@@ -12,7 +12,7 @@ import org.lwjgl.opengl.GL;
 import graphics.entities.GLFWRenderable;
 import graphics.entities.LightSource;
 import graphics.input.KeyAction;
-import graphics.input.Locatable;
+import graphics.input.Observer;
 import graphics.renderers.Renderer;
 
 /**
@@ -54,10 +54,6 @@ public class GLFWWindow {
 	}
 	
 	public GLFWWindow(int width, int height, String name, Map<Integer, KeyAction> keyPressed, Map<Integer, KeyAction> keyReleased) {
-		this(width, height, name, keyPressed, keyReleased, Renderer.defaultVertexShader, Renderer.defaultFragmentShader);
-	}
-	
-	public GLFWWindow(int width, int height, String name, Map<Integer, KeyAction> keyPressed, Map<Integer, KeyAction> keyReleased, String vertexShaderLoc, String fragmentShaderLoc) {
 		errorCallback = GLFWErrorCallback.createPrint(System.err);
 		
 		if (!glfwInit()) {
@@ -89,7 +85,7 @@ public class GLFWWindow {
 		glfwMakeContextCurrent(window);
 		GL.createCapabilities();
 		
-		r = new Renderer(vertexShaderLoc, fragmentShaderLoc);
+		r = new Renderer();
 		
 		this.states = new LinkedList<State>();
    	}
@@ -108,8 +104,8 @@ public class GLFWWindow {
 		this.r.setLightColor(light.color());
 	}
 	
-	public void add(Locatable camera) {
-		this.r.setCamera(camera);
+	public void add(Observer camera) {
+		this.r.createObserver(camera);
 	}
 	
 	public void remove(GLFWRenderable...states) {

@@ -3,7 +3,7 @@ package graphics.input;
 import graphics.entities.Updatable;
 import tensor.Vector;
 
-public interface Locatable extends Updatable {
+public interface Observer extends Updatable {
 	
 	Vector pos();
 	
