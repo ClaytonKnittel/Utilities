@@ -1,13 +1,9 @@
 package graphics.renderers;
 
-import java.nio.IntBuffer;
-
-import org.lwjgl.glfw.GLFW;
-import org.lwjgl.system.MemoryStack;
-
 import graphics.Color;
 import graphics.State;
 import graphics.input.Observer;
+import graphics.shaders.Shader;
 import graphics.shaders.ShaderProgram;
 import tensor.Matrix4;
 import tensor.Vector;
@@ -19,9 +15,11 @@ public class Renderer extends AbstractRenderer {
 	
 	public static final String defaultVertexShader, defaultFragmentShader;
 	
-	private static final float FOV = 72;
-	private static final float NEAR_PLANE = 0.1f;
-	private static final float FAR_PLANE = 4000f;
+	private ShaderProgram program;
+	
+	public static final float FOV = 72;
+	public static final float NEAR_PLANE = 0.1f;
+	public static final float FAR_PLANE = 4000f;
 	
 	private InputVariable[] inputs;
 	
@@ -35,13 +33,28 @@ public class Renderer extends AbstractRenderer {
 	}
 	
 	@Override
-	public void loadUniformVariables(ShaderProgram program) {
+	public void loadUniformVariables() {
 		uniModel = program.getUniformLocation("model");
 		uniView = program.getUniformLocation("view");
 		uniProjection = program.getUniformLocation("projection");
 		
 		uniReflectivity = program.getUniformLocation("reflectivity");
 		uniShineDamper = program.getUniformLocation("shineDamper");
+	}
+	
+	@Override
+	public ShaderProgram program() {
+		return program;
+	}
+	
+	@Override
+	public void initiateProgram(Shader vertexShader, Shader fragmentShader) {
+		program = new ShaderProgram();
+		program.attachShader(vertexShader);
+		program.attachShader(fragmentShader);
+		program.bindFragmentDataLocation(0, "fragColor");
+		program.link();
+		program.use();
 	}
 	
 	public InputVariable[] inputs() {
@@ -94,22 +107,12 @@ public class Renderer extends AbstractRenderer {
 	protected void setViewMatrix(Observer camera) {
 		Matrix4 view = Matrix4.cameraRotateMatrix(-camera.phi(), -camera.theta(), -camera.psi())
 				.multiply(Matrix4.translate(camera.pos().times(-1)));
-		program().setUniform(uniView, view);
+		program.setUniform(uniView, view);
 	}
 	
 	@Override
-	public void setProjectionMatrix(ShaderProgram program) {
-		float ratio;
-		try (MemoryStack stack = MemoryStack.stackPush()) {
-			long window = GLFW.glfwGetCurrentContext();
-			IntBuffer width = stack.mallocInt(1);
-			IntBuffer height = stack.mallocInt(1);
-			GLFW.glfwGetFramebufferSize(window, width, height);
-			ratio = width.get() / (float) height.get();
-		}
-		
-		Matrix4 projection = Matrix4.perspective(FOV, ratio, NEAR_PLANE, FAR_PLANE);
-		program.setUniform(uniProjection, projection);
+	public void setProjectionMatrix() {
+		program.setUniform(uniProjection, ShaderProgram.projectionMatrix(FOV, NEAR_PLANE, FAR_PLANE));
 	}
 	
 	public void setLightPos(Vector p) {

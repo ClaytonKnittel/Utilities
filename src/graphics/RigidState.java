@@ -1,34 +1,14 @@
 package graphics;
 
 import graphics.entities.GLFWRenderable;
-import graphics.entities.VertexArrayObject;
-import graphics.entities.VertexBufferObject;
 import graphics.renderers.InputVariable;
 import graphics.renderers.Renderer;
 import graphics.shaders.ShaderProgram;
-import graphics.shaders.Texture;
 import tensor.Matrix4;
 
-import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL15.*;
-
-import java.nio.FloatBuffer;
-
-import static org.lwjgl.opengl.GL13.*;
-
-import org.lwjgl.system.MemoryStack;
-
-public class RigidState implements graphics.State {
+public class RigidState extends Entity {
 	
 	private GLFWRenderable owner;
-	private Texture texture;
-	
-	private FloatBuffer shapeData;
-
-	private VertexArrayObject vao;
-	private VertexBufferObject vbo;
-	
-	private int numVertices;
 	
 	// Keep a reference to the GLFWRenderable's model matrix
 	private Matrix4 model;
@@ -37,76 +17,24 @@ public class RigidState implements graphics.State {
 	private int numAttributes;
 	
 	protected RigidState(GLFWRenderable r) {
-		this(r.modelData());
+		super(r.modelData(), r.texture());
 		this.owner = r;
-		init();
-	}
-	
-	private RigidState(float[] shapeData) {
-		this.shapeData = FloatBuffer.wrap(shapeData);
-	}
-	
-	private void init() {
-		this.texture = Texture.loadTexture(Texture.path + owner.texture() + ".jpg");
 	}
 	
 	public void update() {
 		owner.update();
 		model = owner.model();
 	}
-
-	public void render(ShaderProgram program, int uniModel, int uniReflectivity, int uniShineDamper) {
-		vao.bind();
-		
+	
+	@Override
+	public void setUniforms(ShaderProgram program, int uniModel, int uniReflectivity, int uniShineDamper) {
 		program.setUniform(uniModel, model);
 		program.setUniform(uniReflectivity, owner.reflectivity());
 		program.setUniform(uniShineDamper, owner.shineDamper());
-		glActiveTexture(GL_TEXTURE0);
-		texture.bind();
-		
-		glDrawArrays(GL_TRIANGLES, 0, numVertices);
 	}
 	
-	private void instantiateVBO(FloatBuffer buffer) {
-		FloatBuffer vertices;
-		try {
-			try (MemoryStack stack = MemoryStack.stackPush()) {
-				vertices = stack.mallocFloat(buffer.limit());
-				for (int i = 0; i < vertices.capacity(); i++) {
-					vertices.put(buffer.get());
-				}
-				numVertices = buffer.limit() / numAttributes;
-				
-				vertices.flip();
-				
-				vbo = new VertexBufferObject();
-				vbo.bind(GL_ARRAY_BUFFER);
-				vbo.uploadData(GL_ARRAY_BUFFER, vertices, GL_STATIC_DRAW);
-				
-				vertices.clear();
-			}
-		} catch (java.lang.OutOfMemoryError e) {
-			vbo = new VertexBufferObject();
-			vbo.bind(GL_ARRAY_BUFFER);
-			vbo.uploadData(GL_ARRAY_BUFFER, buffer, GL_STATIC_DRAW);
-		}
-		buffer.clear();
-	}
-
-	public void enter(Renderer r) {
-		vao = new VertexArrayObject();
-		vao.bind();
-		
-		// calculate the stride
-		for (InputVariable i : r.inputs())
-			numAttributes += i.size();
-		
-		instantiateVBO(this.shapeData);
-		
-		specifyVertexAttributes(r);
-	}
-	
-	private void specifyVertexAttributes(Renderer r) {
+	@Override
+	public void specifyVertexAttributes(Renderer r) {
 		ShaderProgram p = r.program();
 		
 		int offset = 0;
@@ -117,11 +45,17 @@ public class RigidState implements graphics.State {
 			offset += i.size();
 		}
 	}
-
-	public void exit() {
-		vao.delete();
-		vbo.delete();
-		texture.delete();
+	
+	@Override
+	public int numAttributes() {
+		return numAttributes;
+	}
+	
+	@Override
+	public void init(Renderer r) {
+		// calculate the stride
+		for (InputVariable i : r.inputs())
+			numAttributes += i.size();
 	}
 	
 	@Override
