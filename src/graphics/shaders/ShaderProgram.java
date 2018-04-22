@@ -125,6 +125,7 @@ public class ShaderProgram {
 	 * @return Location of the uniform
 	 */
 	public int getUniformLocation(CharSequence name) {
+		use();
 		return glGetUniformLocation(id, name);
 	}
 
@@ -137,6 +138,7 @@ public class ShaderProgram {
 	 *            Value to set
 	 */
 	public void setUniform(int location, int value) {
+		use();
 		glUniform1i(location, value);
 	}
 
@@ -149,6 +151,7 @@ public class ShaderProgram {
 	 *            Value to set
 	 */
 	public void setUniform(int location, float value) {
+		use();
 		glUniform1f(location, value);
 	}
 
@@ -161,6 +164,7 @@ public class ShaderProgram {
 	 *            Value to set
 	 */
 	public void setUniform(int location, Vector2 value) {
+		use();
 		try (MemoryStack stack = MemoryStack.stackPush()) {
 			FloatBuffer buffer = stack.mallocFloat(2);
 			value.toBuffer(buffer);
@@ -177,6 +181,7 @@ public class ShaderProgram {
 	 *            Value to set
 	 */
 	public void setUniform(int location, Vector value) {
+		use();
 		try (MemoryStack stack = MemoryStack.stackPush()) {
 			FloatBuffer buffer = stack.mallocFloat(3);
 			value.toBuffer(buffer);
@@ -193,6 +198,7 @@ public class ShaderProgram {
 	 *            Value to set
 	 */
 	public void setUniform(int location, Vector4 value) {
+		use();
 		try (MemoryStack stack = MemoryStack.stackPush()) {
 			FloatBuffer buffer = stack.mallocFloat(4);
 			value.toBuffer(buffer);
@@ -209,6 +215,7 @@ public class ShaderProgram {
 	 *            Value to set
 	 */
 	public void setUniform(int location, Matrix2 value) {
+		use();
 		try (MemoryStack stack = MemoryStack.stackPush()) {
 			FloatBuffer buffer = stack.mallocFloat(2 * 2);
 			value.toBuffer(buffer);
@@ -226,6 +233,7 @@ public class ShaderProgram {
 	 *            Value to set
 	 */
 	public void setUniform(int location, Matrix value) {
+		use();
 		try (MemoryStack stack = MemoryStack.stackPush()) {
 			FloatBuffer buffer = stack.mallocFloat(3 * 3);
 			value.toBuffer(buffer);
@@ -242,6 +250,7 @@ public class ShaderProgram {
 	 *            Value to set
 	 */
 	public void setUniform(int location, Matrix4 value) {
+		use();
 		try (MemoryStack stack = MemoryStack.stackPush()) {
 			FloatBuffer buffer = stack.mallocFloat(4 * 4);
 			value.toBuffer(buffer);
@@ -266,6 +275,10 @@ public class ShaderProgram {
 	 */
 	public void use() {
 		glUseProgram(id);
+	}
+	
+	public static void clear() {
+		glUseProgram(0);
 	}
 
 	/**

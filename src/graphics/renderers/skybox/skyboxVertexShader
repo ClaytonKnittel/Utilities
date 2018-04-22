@@ -6,9 +6,9 @@ out vec3 texcoords;
 uniform mat4 projection;
 uniform mat4 view;
 
-void main(void){
+void main(void) {
 	
 	gl_Position = projection * view * vec4(pos, 1.0); 
-	textureCoords = pos;
+	texcoords = pos;
 	
 }

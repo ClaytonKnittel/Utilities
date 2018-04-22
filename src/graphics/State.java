@@ -1,6 +1,6 @@
 package graphics;
 
-import graphics.renderers.Renderer;
+import graphics.renderers.AbstractRenderer;
 import graphics.shaders.ShaderProgram;
 
 public interface State {
@@ -8,7 +8,7 @@ public interface State {
 	/**
 	 * Initializes the state
 	 */
-	void enter(Renderer r);
+	void enter(AbstractRenderer r);
 	
 	/**
 	 * Updates the location of the object / uniform variables

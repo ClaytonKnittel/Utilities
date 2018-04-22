@@ -31,14 +31,15 @@ public abstract class AbstractRenderer {
 //	}
 	
 	public AbstractRenderer(String vertexShader, String fragmentShader, boolean cullFaces) {
-		if (cullFaces) {
-			glEnable(GL_CULL_FACE);
-			glCullFace(GL_BACK);
-		}
 		this.vertexShader = Shader.createShader(GL_VERTEX_SHADER, fileToStr(vertexShader));
 		this.fragmentShader = Shader.createShader(GL_FRAGMENT_SHADER, fileToStr(fragmentShader));
 		
 		initiateProgram(this.vertexShader, this.fragmentShader);
+		
+		if (cullFaces) {
+			glEnable(GL_CULL_FACE);
+			glCullFace(GL_BACK);
+		}
 		
 		loadUniformVariables();
 		setProjectionMatrix();
@@ -54,15 +55,21 @@ public abstract class AbstractRenderer {
 	
 	protected abstract void setViewMatrix(Observer observer);
 	
-	protected void update() {
+	public abstract InputVariable[] inputs();
+	
+	public void update() {
+		program().use();
 		observer.update();
 		setViewMatrix(observer);
 	}
 	
 	protected void render() {
+		program().use();
+	}
+	
+	public static void clear() {
 		GL11.glEnable(GL11.GL_DEPTH_TEST);
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
-		program().use();
 	}
 	
 	public void exit() {

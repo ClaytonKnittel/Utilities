@@ -13,7 +13,7 @@ import org.lwjgl.system.MemoryStack;
 
 import graphics.entities.VertexArrayObject;
 import graphics.entities.VertexBufferObject;
-import graphics.renderers.Renderer;
+import graphics.renderers.AbstractRenderer;
 import graphics.shaders.ShaderProgram;
 import graphics.shaders.Texture;
 
@@ -28,9 +28,22 @@ public abstract class Entity implements graphics.State {
 	
 	private int numVertices;
 	
+	private boolean cubeMap;
+	
 	public Entity(float[] shapeData, String texture) {
-		this.shapeData = FloatBuffer.wrap(shapeData);
+		this(shapeData);
 		this.texture = Texture.loadTexture(Texture.path + texture + ".jpg");
+		cubeMap = false;
+	}
+	
+	public Entity(float[] shapeData, String[] textures) {
+		this(shapeData);
+		this.texture = Texture.loadCubeMap(textures);
+		cubeMap = true;
+	}
+	
+	private Entity(float[] shapeData) {
+		this.shapeData = FloatBuffer.wrap(shapeData);
 	}
 	
 	@Override
@@ -39,7 +52,10 @@ public abstract class Entity implements graphics.State {
 		setUniforms(program, uniModel, uniReflectivity, uniShineDamper);
 		
 		glActiveTexture(GL_TEXTURE0);
-		texture.bind();
+		if (cubeMap)
+			texture.bindCubeMap();
+		else
+			texture.bind();
 		
 		glDrawArrays(GL_TRIANGLES, 0, numVertices);
 	}
@@ -48,9 +64,9 @@ public abstract class Entity implements graphics.State {
 	
 	public abstract int numAttributes();
 	
-	public abstract void init(Renderer r);
+	public abstract void init(AbstractRenderer r);
 	
-	public abstract void specifyVertexAttributes(Renderer r);
+	public abstract void specifyVertexAttributes(AbstractRenderer r);
 	
 	private void instantiateVBO(FloatBuffer buffer) {
 		FloatBuffer vertices;
@@ -79,7 +95,8 @@ public abstract class Entity implements graphics.State {
 	}
 
 	@Override
-	public void enter(Renderer r) {
+	public void enter(AbstractRenderer r) {
+		r.program().use();
 		vao = new VertexArrayObject();
 		vao.bind();
 		init(r);

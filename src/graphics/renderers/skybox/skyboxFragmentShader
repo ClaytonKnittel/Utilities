@@ -2,10 +2,10 @@
 
 in vec3 texcoords;
 
-out vec4 fragColor;
+out vec4 frag_Color;
 
 uniform samplerCube cubeMap;
 
-void main(void){
-    fragColor = texture(cubeMap, texcoords);
+void main(void) {
+    frag_Color = texture(cubeMap, texcoords);
 }

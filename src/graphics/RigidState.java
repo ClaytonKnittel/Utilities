@@ -1,8 +1,8 @@
 package graphics;
 
 import graphics.entities.GLFWRenderable;
+import graphics.renderers.AbstractRenderer;
 import graphics.renderers.InputVariable;
-import graphics.renderers.Renderer;
 import graphics.shaders.ShaderProgram;
 import tensor.Matrix4;
 
@@ -34,7 +34,7 @@ public class RigidState extends Entity {
 	}
 	
 	@Override
-	public void specifyVertexAttributes(Renderer r) {
+	public void specifyVertexAttributes(AbstractRenderer r) {
 		ShaderProgram p = r.program();
 		
 		int offset = 0;
@@ -52,7 +52,7 @@ public class RigidState extends Entity {
 	}
 	
 	@Override
-	public void init(Renderer r) {
+	public void init(AbstractRenderer r) {
 		// calculate the stride
 		for (InputVariable i : r.inputs())
 			numAttributes += i.size();

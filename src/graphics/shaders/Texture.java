@@ -1,6 +1,7 @@
 package graphics.shaders;
 
 import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL12.*;
 import static org.lwjgl.opengl.GL13.*;
 import static org.lwjgl.stb.STBImage.*;
 
@@ -50,6 +51,8 @@ public class Texture {
 
 	public void bindCubeMap() {
 		glBindTexture(GL_TEXTURE_CUBE_MAP, id);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	}
 
 	/**
@@ -215,10 +218,11 @@ public class Texture {
 		texture.setWidth(width);
 		texture.setHeight(height);
 
+		//glActiveTexture(GL_TEXTURE0);
 		texture.bindCubeMap();
 
 		for (int i = 0; i < data.length; i++)
-			texture.uploadCubeMap(i, GL_RGBA8, width, height, GL_RGBA, data[i]);
+			texture.uploadCubeMap(i, GL_RGBA, width, height, GL_RGBA, data[i]);
 		
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -244,7 +248,7 @@ public class Texture {
 			IntBuffer comp = stack.mallocInt(1);
 
 			/* Load image */
-			stbi_set_flip_vertically_on_load(true);
+			//stbi_set_flip_vertically_on_load(true);
 			image = stbi_load(path, w, h, comp, 4);
 			if (image == null) {
 				throw new RuntimeException(
@@ -270,11 +274,11 @@ public class Texture {
 				IntBuffer comp = stack.mallocInt(1);
 				
 				/* Load image */
-				stbi_set_flip_vertically_on_load(true);
+				//stbi_set_flip_vertically_on_load(true);
 				images[i] = stbi_load(paths[i], w, h, comp, 4);
 				if (images[i] == null) {
 					throw new RuntimeException(
-							"Failed to load a texture file!" + System.lineSeparator() + stbi_failure_reason());
+							"Failed to load a texture file!" + System.lineSeparator() + stbi_failure_reason() + "\n" + paths[i]);
 				}
 	
 				/* Get width and height of image */
