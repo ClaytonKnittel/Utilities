@@ -2,8 +2,7 @@ package graphics;
 
 import static org.lwjgl.opengl.GL11.GL_TRIANGLES;
 import static org.lwjgl.opengl.GL11.glDrawArrays;
-import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
-import static org.lwjgl.opengl.GL13.glActiveTexture;
+import static org.lwjgl.opengl.GL13.*;
 import static org.lwjgl.opengl.GL15.GL_ARRAY_BUFFER;
 import static org.lwjgl.opengl.GL15.GL_STATIC_DRAW;
 

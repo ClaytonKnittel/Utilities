@@ -10,8 +10,9 @@ import tensor.Vector;
 
 public class Renderer extends AbstractRenderer {
 	
-	private static int uniModel, uniView, uniProjection;
-	private static int uniReflectivity, uniShineDamper;
+	private int uniModel, uniView, uniProjection;
+	private int uniReflectivity, uniShineDamper;
+	private int uniTexture;
 	
 	public static final String defaultVertexShader, defaultFragmentShader;
 	
@@ -40,6 +41,14 @@ public class Renderer extends AbstractRenderer {
 		
 		uniReflectivity = program.getUniformLocation("reflectivity");
 		uniShineDamper = program.getUniformLocation("shineDamper");
+		
+		uniTexture = program.getUniformLocation("texImage");
+		
+		loadTextureUnits();
+	}
+	
+	private void loadTextureUnits() {
+		program.setUniform(uniTexture, 0);
 	}
 	
 	@Override

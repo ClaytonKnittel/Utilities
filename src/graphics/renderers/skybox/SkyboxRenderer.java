@@ -22,9 +22,9 @@ public class SkyboxRenderer extends AbstractRenderer {
 	private int location_projectionMatrix;
 	private int location_viewMatrix;
 	
-	public SkyboxRenderer() {
-		super(VERTEX_FILE, FRAGMENT_FILE, true);
-		this.box = new Box();
+	public SkyboxRenderer(String texture) {
+		super(VERTEX_FILE, FRAGMENT_FILE, false);
+		this.box = new Box(texture);
 	}
 	
 	@Override
@@ -76,8 +76,8 @@ public class SkyboxRenderer extends AbstractRenderer {
 	
 	private static class Box extends Entity {
 		
-		public Box() {
-			super(VERTICES, locs);
+		public Box(String texture) {
+			super(VERTICES, getLocs(texture));
 		}
 
 		@Override
@@ -154,15 +154,15 @@ public class SkyboxRenderer extends AbstractRenderer {
 		     SIZE, -SIZE,  SIZE
 		};
 		
-		private static final String texture = "clouds";
-		
-		private static final String[] locs = {
+		private static String[] getLocs(String texture) {
+			 return new String[] {
 				Texture.path + texture + "_right.jpg",
 				Texture.path + texture + "_left.jpg",
 				Texture.path + texture + "_up.jpg",
 				Texture.path + texture + "_down.jpg",
 				Texture.path + texture + "_back.jpg",
 				Texture.path + texture + "_front.jpg"};
+		}
 		
 	}
 

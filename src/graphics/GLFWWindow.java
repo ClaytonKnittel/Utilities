@@ -89,10 +89,13 @@ public class GLFWWindow {
 		GL.createCapabilities();
 		
 		r = new Renderer();
-		skybox = new SkyboxRenderer();
 		
 		this.states = new LinkedList<State>();
    	}
+	
+	public void setupSkybox(String texture) {
+		skybox = new SkyboxRenderer(texture);
+	}
 	
 	public void configureInputs(String names, int[] sizes) {
 		r.configureInputVariables(names, sizes);
@@ -110,7 +113,8 @@ public class GLFWWindow {
 	
 	public void add(Observer camera) {
 		this.r.createObserver(camera);
-		this.skybox.createObserver(camera);
+		if (skybox != null)
+			this.skybox.createObserver(camera);
 	}
 	
 	public void remove(GLFWRenderable...states) {
@@ -123,7 +127,8 @@ public class GLFWWindow {
 	 */
 	public void enter() {
 		r.enter(states);
-		skybox.enter();
+		if (skybox != null)
+			skybox.enter();
 	}
 	
 	public void setQuitAction(QuitAction q) {
@@ -149,9 +154,11 @@ public class GLFWWindow {
 	
 	public void render() {
 		AbstractRenderer.clear();
-		skybox.update();
+		if (skybox != null) {
+			skybox.update();
+			skybox.render();
+		}
 		r.update(states);
-		skybox.render();
 		r.render(states);
 		
 		
@@ -162,7 +169,8 @@ public class GLFWWindow {
 	public void destroy() {
 		for (State s : states)
 			s.exit();
-		skybox.exit();
+		if (skybox != null)
+			skybox.exit();
 		r.exit();
 		glfwDestroyWindow(window);
 		keyCallback.free();
