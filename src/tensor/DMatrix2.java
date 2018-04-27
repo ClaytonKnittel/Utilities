@@ -1,53 +1,44 @@
 package tensor;
 
-import java.nio.FloatBuffer;
+import java.nio.DoubleBuffer;
 
-/**
- * This class represents a 4x4-Matrix. GLSL equivalent to mat4.
- *
- * @author Heiko Brumme
- */
-public class Matrix2 {
-
-	private float m00, m01;
-	private float m10, m11;
+public class DMatrix2 {
+	
+	private double m00, m01;
+	private double m10, m11;
 
 	/**
 	 * Creates a 4x4 identity matrix.
 	 */
-	public Matrix2() {
+	public DMatrix2() {
 		setIdentity();
 	}
 
 	/**
-	 * Creates a 4x4 matrix with specified columns.
+	 * Creates a 2x2 matrix with specified columns.
 	 *
 	 * @param col1
 	 *            Vector with values of the first column
 	 * @param col2
 	 *            Vector with values of the second column
-	 * @param col3
-	 *            Vector with values of the third column
-	 * @param col4
-	 *            Vector with values of the fourth column
 	 */
-	public Matrix2(Vector2 col1, Vector2 col2) {
-		m00 = col1.x;
-		m10 = col1.y;
+	public DMatrix2(DVector2 col1, DVector2 col2) {
+		m00 = col1.x();
+		m10 = col1.y();
 
-		m01 = col2.x;
-		m11 = col2.y;
+		m01 = col2.x();
+		m11 = col2.y();
 	}
 
 	/**
 	 * Sets this matrix to the identity matrix.
 	 */
 	public final void setIdentity() {
-		m00 = 1f;
-		m11 = 1f;
+		m00 = 1d;
+		m11 = 1d;
 
-		m01 = 0f;
-		m10 = 0f;
+		m01 = 0d;
+		m10 = 0d;
 	}
 
 	/**
@@ -58,8 +49,8 @@ public class Matrix2 {
 	 *
 	 * @return Sum of this + other
 	 */
-	public Matrix2 add(Matrix2 other) {
-		Matrix2 result = new Matrix2();
+	public DMatrix2 add(DMatrix2 other) {
+		DMatrix2 result = new DMatrix2();
 
 		result.m00 = this.m00 + other.m00;
 		result.m10 = this.m10 + other.m10;
@@ -75,8 +66,8 @@ public class Matrix2 {
 	 *
 	 * @return Negated matrix
 	 */
-	public Matrix2 negate() {
-		return multiply(-1f);
+	public DMatrix2 negate() {
+		return multiply(-1d);
 	}
 
 	/**
@@ -87,7 +78,7 @@ public class Matrix2 {
 	 *
 	 * @return Difference of this - other
 	 */
-	public Matrix2 subtract(Matrix2 other) {
+	public DMatrix2 subtract(DMatrix2 other) {
 		return this.add(other.negate());
 	}
 
@@ -99,8 +90,8 @@ public class Matrix2 {
 	 *
 	 * @return Scalar product of this * scalar
 	 */
-	public Matrix2 multiply(float scalar) {
-		Matrix2 result = new Matrix2();
+	public DMatrix2 multiply(double scalar) {
+		DMatrix2 result = new DMatrix2();
 
 		result.m00 = this.m00 * scalar;
 		result.m10 = this.m10 * scalar;
@@ -119,10 +110,10 @@ public class Matrix2 {
 	 *
 	 * @return Vector product of this * other
 	 */
-	public Vector2 multiply(Vector4 vector) {
-		float x = this.m00 * vector.x + this.m01 * vector.y;
-		float y = this.m10 * vector.x + this.m11 * vector.y;
-		return new Vector2(x, y);
+	public DVector2 multiply(DVector2 vector) {
+		double x = this.m00 * vector.x() + this.m01 * vector.y();
+		double y = this.m10 * vector.x() + this.m11 * vector.y();
+		return new DVector2(x, y);
 	}
 
 	/**
@@ -133,8 +124,8 @@ public class Matrix2 {
 	 *
 	 * @return Matrix product of this * other
 	 */
-	public Matrix2 multiply(Matrix2 other) {
-		Matrix2 result = new Matrix2();
+	public DMatrix2 multiply(DMatrix2 other) {
+		DMatrix2 result = new DMatrix2();
 
 		result.m00 = this.m00 * other.m00 + this.m01 * other.m10;
 		result.m10 = this.m10 * other.m00 + this.m11 * other.m10;
@@ -150,8 +141,8 @@ public class Matrix2 {
 	 *
 	 * @return Transposed matrix
 	 */
-	public Matrix2 transpose() {
-		Matrix2 result = new Matrix2();
+	public DMatrix2 transpose() {
+		DMatrix2 result = new DMatrix2();
 
 		result.m00 = this.m00;
 		result.m10 = this.m01;
@@ -168,7 +159,7 @@ public class Matrix2 {
 	 * @param buffer
 	 *            The buffer to store the matrix data
 	 */
-	public void toBuffer(FloatBuffer buffer) {
+	public void toBuffer(DoubleBuffer buffer) {
 		buffer.put(m00).put(m10);
 		buffer.put(m01).put(m11);
 		buffer.flip();
@@ -186,13 +177,31 @@ public class Matrix2 {
 	 *
 	 * @return Scaling matrix
 	 */
-	public static Matrix2 scale(float x, float y) {
-		Matrix2 scaling = new Matrix2();
+	public static DMatrix2 scale(double x, double y) {
+		DMatrix2 scaling = new DMatrix2();
 
 		scaling.m00 = x;
 		scaling.m11 = y;
 
 		return scaling;
+	}
+	
+	public static DMatrix2 rotate(double angle) {
+		DMatrix2 rotate = new DMatrix2();
+		double c = Math.cos(angle);
+		double s = Math.sin(angle);
+		
+		rotate.m00 = c;
+		rotate.m01 = -s;
+		rotate.m10 = s;
+		rotate.m11 = c;
+		
+		return rotate;
+	}
+	
+	public String toString() {
+		return m00 + "\t" + m01 + "\n"
+			 + m10 + "\t" + m11;
 	}
 
 }

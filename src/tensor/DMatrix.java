@@ -2,7 +2,7 @@ package tensor;
 
 import java.nio.DoubleBuffer;
 
-public class Matrixd {
+public class DMatrix {
 
 	private double m00, m01, m02;
 	private double m10, m11, m12;
@@ -11,7 +11,7 @@ public class Matrixd {
 	/**
 	 * Creates a 4x4 identity matrix.
 	 */
-	public Matrixd() {
+	public DMatrix() {
 		setIdentity();
 	}
 
@@ -27,7 +27,7 @@ public class Matrixd {
 	 * @param col4
 	 *            Vector with values of the fourth column
 	 */
-	public Matrixd(DVector col1, DVector col2, DVector col3, DVector col4) {
+	public DMatrix(DVector col1, DVector col2, DVector col3, DVector col4) {
 		m00 = col1.x();
 		m10 = col1.y();
 		m20 = col1.z();
@@ -65,8 +65,8 @@ public class Matrixd {
 	 *
 	 * @return Sum of this + other
 	 */
-	public Matrixd add(Matrixd other) {
-		Matrixd result = new Matrixd();
+	public DMatrix add(DMatrix other) {
+		DMatrix result = new DMatrix();
 
 		result.m00 = this.m00 + other.m00;
 		result.m10 = this.m10 + other.m10;
@@ -88,7 +88,7 @@ public class Matrixd {
 	 *
 	 * @return Negated matrix
 	 */
-	public Matrixd negate() {
+	public DMatrix negate() {
 		return multiply(-1f);
 	}
 
@@ -100,7 +100,7 @@ public class Matrixd {
 	 *
 	 * @return Difference of this - other
 	 */
-	public Matrixd subtract(Matrixd other) {
+	public DMatrix subtract(DMatrix other) {
 		return this.add(other.negate());
 	}
 
@@ -112,8 +112,8 @@ public class Matrixd {
 	 *
 	 * @return Scalar product of this * scalar
 	 */
-	public Matrixd multiply(double scalar) {
-		Matrixd result = new Matrixd();
+	public DMatrix multiply(double scalar) {
+		DMatrix result = new DMatrix();
 
 		result.m00 = this.m00 * scalar;
 		result.m10 = this.m10 * scalar;
@@ -153,8 +153,8 @@ public class Matrixd {
 	 *
 	 * @return Matrix product of this * other
 	 */
-	public Matrixd multiply(Matrixd other) {
-		Matrixd result = new Matrixd();
+	public DMatrix multiply(DMatrix other) {
+		DMatrix result = new DMatrix();
 
 		result.m00 = this.m00 * other.m00 + this.m01 * other.m10 + this.m02 * other.m20;
 		result.m10 = this.m10 * other.m00 + this.m11 * other.m10 + this.m12 * other.m20;
@@ -176,8 +176,8 @@ public class Matrixd {
 	 *
 	 * @return Transposed matrix
 	 */
-	public Matrixd transpose() {
-		Matrixd result = new Matrixd();
+	public DMatrix transpose() {
+		DMatrix result = new DMatrix();
 
 		result.m00 = this.m00;
 		result.m10 = this.m01;
@@ -214,8 +214,8 @@ public class Matrixd {
 	 *            angle to rotate about y-axis
 	 * @return a rotation operator about y
 	 */
-	public static Matrixd yRotate(double angle) {
-		Matrixd rotate = new Matrixd();
+	public static DMatrix yRotate(double angle) {
+		DMatrix rotate = new DMatrix();
 
 		double sin = Math.sin(angle);
 		double cos = Math.cos(angle);
@@ -235,8 +235,8 @@ public class Matrixd {
 	 *            angle to rotate about x-axis
 	 * @return a rotation operator about x
 	 */
-	public static Matrixd xRotate(double angle) {
-		Matrixd rotate = new Matrixd();
+	public static DMatrix xRotate(double angle) {
+		DMatrix rotate = new DMatrix();
 
 		double sin = Math.sin(angle);
 		double cos = Math.cos(angle);
@@ -256,8 +256,8 @@ public class Matrixd {
 	 *            angle to rotate about z-axis
 	 * @return a rotation operator about z
 	 */
-	public static Matrixd zRotate(double angle) {
-		Matrixd rotate = new Matrixd();
+	public static DMatrix zRotate(double angle) {
+		DMatrix rotate = new DMatrix();
 
 		double sin = Math.sin(angle);
 		double cos = Math.cos(angle);
@@ -285,8 +285,8 @@ public class Matrixd {
 	 *
 	 * @return Rotation matrix
 	 */
-	public static Matrixd rotate(double angle, double x, double y, double z) {
-		Matrixd rotation = new Matrixd();
+	public static DMatrix rotate(double angle, double x, double y, double z) {
+		DMatrix rotation = new DMatrix();
 
 		double c = Math.cos(Math.toRadians(angle));
 		double s = Math.sin(Math.toRadians(angle));
@@ -323,8 +323,8 @@ public class Matrixd {
 	 *
 	 * @return Scaling matrix
 	 */
-	public static Matrixd scale(double x, double y, double z) {
-		Matrixd scaling = new Matrixd();
+	public static DMatrix scale(double x, double y, double z) {
+		DMatrix scaling = new DMatrix();
 
 		scaling.m00 = x;
 		scaling.m11 = y;
@@ -333,11 +333,11 @@ public class Matrixd {
 		return scaling;
 	}
 	
-	public static Matrixd toRotatingFrame(DVector d) {
+	public static DMatrix toRotatingFrame(DVector d) {
 		return toRotatingFrame(d.x(), d.y(), d.z());
 	}
 
-	public static Matrixd toRotatingFrame(double phi, double theta, double psi) {
+	public static DMatrix toRotatingFrame(double phi, double theta, double psi) {
 //		float st = (float) Math.sin(theta);
 //		float ct = (float) Math.cos(theta);
 //		float sp = (float) Math.sin(phi);
@@ -345,14 +345,14 @@ public class Matrixd {
 //
 //		return Matrixd.rotate(phi, 0, 0, 1).multiply(Matrixd.rotate(theta, -sp, cp, 0))
 //				.multiply(Matrixd.rotate(psi, cp * st, sp * st, ct));
-		return Matrixd.zRotate(-psi).multiply(Matrixd.yRotate(-theta)).multiply(Matrixd.zRotate(-phi));
+		return DMatrix.zRotate(-psi).multiply(DMatrix.yRotate(-theta)).multiply(DMatrix.zRotate(-phi));
 	}
 	
-	public static Matrixd toSpaceFrame(DVector d) {
+	public static DMatrix toSpaceFrame(DVector d) {
 		return toSpaceFrame(d.x(), d.y(), d.z());
 	}
 
-	public static Matrixd toSpaceFrame(double phi, double theta, double psi) {
+	public static DMatrix toSpaceFrame(double phi, double theta, double psi) {
 //		phi *= -1;
 //		theta *= -1;
 //		psi *= -1;
@@ -364,7 +364,7 @@ public class Matrixd {
 //
 //		return Matrixd.rotate(psi, cp * st, sp * st, ct).multiply(Matrixd.rotate(theta, -sp, cp, 0))
 //				.multiply(Matrixd.rotate(phi, 0, 0, 1));
-		return Matrixd.zRotate(phi).multiply(Matrixd.yRotate(theta)).multiply(Matrixd.zRotate(psi));
+		return DMatrix.zRotate(phi).multiply(DMatrix.yRotate(theta)).multiply(DMatrix.zRotate(psi));
 	}
 	
 	public String toString() {
