@@ -1,0 +1,27 @@
+#version 150 core
+
+in vec3 pos;
+in vec3 norm;
+in vec2 texcoord;
+
+/* out vec4 vertexColor; */
+out vec3 toLightPos;
+out vec3 surfaceNorm;
+out vec3 worldPosition;
+out vec2 textureCoord;
+
+uniform mat4 model;
+uniform mat4 view;
+uniform mat4 projection;
+uniform vec3 lightPos;
+
+void main() {
+	vec4 worldPos = model * vec4(pos, 1.0);
+	/* vertexColor = vec4(color, 1.0); */
+	toLightPos = lightPos - worldPos.xyz;
+	surfaceNorm = (model * vec4(norm, 0)).xyz;
+	worldPosition = vec3(inverse(view) * vec4(0, 0, 0, 1)) - vec3(worldPos);
+	
+	textureCoord = texcoord;
+	gl_Position = projection * view * worldPos;
+}

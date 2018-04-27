@@ -119,7 +119,7 @@ public class GLFWWindow {
 	
 	public void remove(GLFWRenderable...states) {
 		for (GLFWRenderable r : states)
-			this.states.remove(r);
+			this.states.remove(new RigidState(r));
 	}
 	
 	/**

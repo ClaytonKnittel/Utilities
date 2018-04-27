@@ -36,6 +36,10 @@ public class Vector2 {
         buffer.flip();
     }
 	
+	public DVector2 toDVector2() {
+		return new DVector2(x, y);
+	}
+	
 	protected void set(float x, float y) {
 		this.x = x;
 		this.y = y;
