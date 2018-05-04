@@ -89,6 +89,14 @@ public class DVector2 {
 		return x * v.x + y * v.y;
 	}
 	
+	public double cross(DVector2 v) {
+		return x * v.y - y * v.x;
+	}
+	
+	public DVector2 crossPerpendicular(double zMag) {
+		return new DVector2(y * zMag, -x * zMag);
+	}
+	
 	
 	public double mag2() {
 		return x * x + y * y;
@@ -104,6 +112,16 @@ public class DVector2 {
 	
 	public DVector2 normalized() {
 		return new DVector2(this.divide(mag()));
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+		if (o == this)
+			return true;
+		if (!(o instanceof DVector2))
+			return false;
+		DVector2 d = (DVector2) o;
+		return d.x == x && d.y == y;
 	}
 	
 	public String toString() {
