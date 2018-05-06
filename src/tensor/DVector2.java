@@ -97,6 +97,9 @@ public class DVector2 {
 		return new DVector2(y * zMag, -x * zMag);
 	}
 	
+	public double angle() {
+		return Math.atan2(y, x);
+	}
 	
 	public double mag2() {
 		return x * x + y * y;
