@@ -27,6 +27,14 @@ public class Web<E> {
 		}
 	}
 	
+	public boolean contains(E e) {
+		for (Node<E> node : elements) {
+			if (e == node.val)
+				return true;
+		}
+		return false;
+	}
+	
 	public void remove(E e) {
 		for (Node<E> d : elements) {
 			if (d.val == e)
