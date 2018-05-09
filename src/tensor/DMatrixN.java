@@ -46,6 +46,12 @@ public class DMatrixN {
 			a[i] = m.a[i];
 	}
 	
+	public static DMatrixN get(DMatrix m) {
+		DMatrixN r = zero(3);
+		r.a = m.toArray();
+		return r;
+	}
+	
 	public static DMatrixN zero(int n) {
 		return new DMatrixN(n, false);
 	}
@@ -77,7 +83,7 @@ public class DMatrixN {
 		DMatrixN res = zero(n);
 		int t, o; // offsets for this and m, respectively
 		for (int i = 0; i < a.length; i++) {
-			t = i / n;
+			t = i / n * n;
 			o = i % n;
 			for (int j = 0; j < n; j++) {
 				res.a[i] += a[t + j] * m.a[o + n * j];

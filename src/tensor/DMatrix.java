@@ -26,10 +26,8 @@ public class DMatrix {
 	 *            Vector with values of the second column
 	 * @param col3
 	 *            Vector with values of the third column
-	 * @param col4
-	 *            Vector with values of the fourth column
 	 */
-	public DMatrix(DVector col1, DVector col2, DVector col3, DVector col4) {
+	public DMatrix(DVector col1, DVector col2, DVector col3) {
 		m00 = col1.x();
 		m10 = col1.y();
 		m20 = col1.z();
@@ -57,6 +55,14 @@ public class DMatrix {
 		m12 = 0d;
 		m20 = 0d;
 		m21 = 0d;
+	}
+	
+	protected double[] toArray() {
+		return new double[] {
+			m00, m01, m02,
+			m10, m11, m12,
+			m20, m21, m22
+		};
 	}
 
 	/**
@@ -372,6 +378,6 @@ public class DMatrix {
 	public String toString() {
 		return "" + round(m00) + "\t" + round(m01) + "\t" + round(m02) + "\n" + 
 				round(m10) + "\t" + round(m11) + "\t" + round(m12) + "\n" + 
-				round(m20) + "\t" + round(m21) + "\t" + round(m22) + "\n";
+				round(m20) + "\t" + round(m21) + "\t" + round(m22);
 	}
 }
