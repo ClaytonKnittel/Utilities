@@ -22,6 +22,8 @@ public class DMatrixN {
 			mul *= 10;
 	}
 	
+	private DMatrixN() {}
+	
 	/**
 	 * Creates a new DMatrixN of dimension n x n.
 	 * <p>
@@ -57,6 +59,26 @@ public class DMatrixN {
 	
 	public static DMatrixN zero(int n) {
 		return new DMatrixN(n, false);
+	}
+	
+	/**
+	 * Compute an interaction matrix between all pairs of a list of objects.
+	 * 
+	 * @param entities
+	 * @param e the interaction function between any two objects
+	 * @return the interaction matrix
+	 */
+	public static <E> DMatrixN interactionMatrix(E[] entities, Interaction<E> e) {
+		DMatrixN r = new DMatrixN(entities.length, false);
+		for (int i = 0; i < entities.length; i++) {
+			for (int j = 0; j < entities.length; j++)
+				r.set(i, j, e.interact(entities[i], entities[j]));
+		}
+		return r;
+	}
+	
+	public static interface Interaction<E> {
+		double interact(E e1, E e2);
 	}
 	
 	private void setIdentity() {
@@ -144,6 +166,10 @@ public class DMatrixN {
 		DMatrixN a;
 		DVectorN b;
 		
+		Augmented(DMatrixN a) {
+			this(a, null);
+		}
+		
 		Augmented(DMatrixN a, DVectorN b) {
 			this.a = a;
 			this.b = b;
@@ -160,9 +186,11 @@ public class DMatrixN {
 		
 		void swap(int i, int j) {
 			a.swapRows(i, j);
-			double c = b.get(i);
-			b.set(i, b.get(j));
-			b.set(j, c);
+			if (b != null) {
+				double c = b.get(i);
+				b.set(i, b.get(j));
+				b.set(j, c);
+			}
 		}
 		
 		/**
@@ -193,7 +221,8 @@ public class DMatrixN {
 			for (int i = 0; i < a.n; i++) {
 				a.add(to, i, scale * a.get(row, i));
 			}
-			b.add(to, b.get(row) * scale);
+			if (b != null)
+				b.add(to, b.get(row) * scale);
 		}
 		
 		public String toString() {
@@ -201,36 +230,30 @@ public class DMatrixN {
 			for (int i = 0; i < a.n; i++) {
 				for (int j = 0; j < a.n; j++)
 					ret += round(a.get(i, j)) + "\t";
-				ret += ":  " + b.get(i) + "\n";
+				if (b != null)
+					ret += ":  " + b.get(i);
+				ret += "\n";
 			}
 			return ret;
 		}
 	}
 	
 	public DMatrixN gaussian() {
-		DMatrixN ret = new DMatrixN(this);
-		double factor;
-		for (int i = 0; i < n - 1; i++) {
-			for (int j = i + 1; j < n; j++) {
-				if (ret.get(i, i) == 0) {
-					boolean f = false;
-					for (int q = i + 1; q < n; q++) {
-						if (ret.get(q, i) != 0) {
-							ret.swapRows(i, q);
-							f = true;
-							break;
-						}
-					}
-					if (!f) {
-						continue;
-					}
-				}
-				factor = ret.get(j, i) / ret.get(i, i);
-				for (int k = i; k < n; k++)
-					ret.set(j, k, ret.get(j, k) - factor * ret.get(i, k));
+		Augmented m = new Augmented(new DMatrixN(this));
+		int col = 0;
+		all: for (int i = 0; i < m.a.n - 1; i++) {
+			while (m.a.get(i, col) == 0) {
+				if (col == m.a.n)
+					break all;
+				if (m.swapNonzero(i, col))
+					break;
+				col++;
+			}
+			for (int j = i + 1; j < m.a.n; j++) {
+				m.eliminate(i, j, col);
 			}
 		}
-		return ret;
+		return m.a;
 	}
 	
 	private void swapRows(int i, int j) {

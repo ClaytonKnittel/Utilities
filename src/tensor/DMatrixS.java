@@ -56,6 +56,28 @@ public class DMatrixS {
 		return new DMatrixS(n, false);
 	}
 	
+	/**
+	 * Compute an interaction matrix between all pairs of a list of objects. The
+	 * interaction must be symmetric, otherwise the resultant matrix will not be
+	 * correct.
+	 * 
+	 * @param entities
+	 * @param e the interaction function between any two objects
+	 * @return the interaction matrix
+	 */
+	public static <E> DMatrixS interactionMatrix(E[] entities, SymmetricInteraction<E> e) {
+		DMatrixS r = new DMatrixS(entities.length, false);
+		for (int i = 0; i < entities.length; i++) {
+			for (int j = i; j < entities.length; j++)
+				r.set(i, j, e.interact(entities[i], entities[j]));
+		}
+		return r;
+	}
+	
+	public static interface SymmetricInteraction<E> {
+		double interact(E e1, E e2);
+	}
+	
 	public double get(int i, int j) {
 		return a[index(i, j)];
 	}
