@@ -2,6 +2,8 @@ package tensor;
 
 import java.nio.DoubleBuffer;
 
+import static tensor.DMatrixN.round;
+
 public class DVector2 {
 	
 	private double x, y;
@@ -128,7 +130,7 @@ public class DVector2 {
 	}
 	
 	public String toString() {
-		return "(" + x + ", " + y + ")";
+		return "(" + round(x) + ", " + round(y) + ")";
 	}
 	
 }

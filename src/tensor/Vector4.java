@@ -2,6 +2,8 @@ package tensor;
 
 import java.nio.FloatBuffer;
 
+import static tensor.DMatrixN.round;
+
 public class Vector4 {
 	
 	protected float x, y, z, w;
@@ -118,7 +120,7 @@ public class Vector4 {
 	}
 	
 	public String toString() {
-		return "(" + x + ", " + y + ", " + z + ", " + w + ")";
+		return "(" + round(x) + ", " + round(y) + ", " + round(z) + ", " + round(w) + ")";
 	}
 	
 }

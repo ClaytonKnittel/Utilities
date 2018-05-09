@@ -2,6 +2,8 @@ package tensor;
 
 import java.nio.DoubleBuffer;
 
+import static tensor.DMatrixN.round;
+
 public class DMatrix {
 
 	private double m00, m01, m02;
@@ -368,18 +370,8 @@ public class DMatrix {
 	}
 	
 	public String toString() {
-		return "" + m00 + "\t" + m01 + "\t" + m02 + "\n" + 
-				m10 + "\t" + m11 + "\t" + m12 + "\n" + 
-				m20 + "\t" + m21 + "\t" + m22 + "\n";
-	}
-	
-	public String roundString() {
 		return "" + round(m00) + "\t" + round(m01) + "\t" + round(m02) + "\n" + 
 				round(m10) + "\t" + round(m11) + "\t" + round(m12) + "\n" + 
 				round(m20) + "\t" + round(m21) + "\t" + round(m22) + "\n";
-	}
-	
-	private static float round(double d) {
-		return Math.round(1000 * d) / 1000f;
 	}
 }

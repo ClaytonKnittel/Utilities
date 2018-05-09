@@ -2,6 +2,8 @@ package tensor;
 
 import java.nio.FloatBuffer;
 
+import static tensor.DMatrixN.round;
+
 /**
  * This class represents a 4x4-Matrix. GLSL equivalent to mat4.
  *
@@ -193,6 +195,11 @@ public class Matrix2 {
 		scaling.m11 = y;
 
 		return scaling;
+	}
+	
+	public String toString() {
+		return "" + round(m00) + "\t" + round(m01) + "\n"
+				  + round(m10) + "\t" + round(m11);
 	}
 
 }

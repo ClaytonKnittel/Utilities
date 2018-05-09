@@ -1,5 +1,7 @@
 package tensor;
 
+import static tensor.DMatrixN.round;
+
 public class DVector {
 
 	private double x, y, z;
@@ -114,7 +116,7 @@ public class DVector {
 	}
 	
 	public String toString() {
-		return "(" + x + ", " + y + ", " + z + ")";
+		return "(" + round(x) + ", " + round(y) + ", " + round(z) + ")";
 	}
 	
 }
