@@ -9,7 +9,7 @@ package tensor;
 public class DMatrixN {
 	
 	private double[] a;
-	private int n;
+	protected int n;
 	
 	protected static int acc = 3; // how many digits to round matrices to when printing, setting to 0 means don't round
 	
@@ -42,14 +42,17 @@ public class DMatrixN {
 	
 	public DMatrixN(DMatrixN m) {
 		a = new double[m.a.length];
+		n = m.n;
 		for (int i = 0; i < a.length; i++)
 			a[i] = m.a[i];
 	}
 	
-	public static DMatrixN get(DMatrix m) {
-		DMatrixN r = zero(3);
-		r.a = m.toArray();
-		return r;
+	public DMatrixN(double...args) {
+		double d = Math.round(Math.sqrt(args.length));
+		if ((int) d != d)
+			throw new IllegalArgumentException("DMatrixN matrices must be square");
+		a = args;
+		n = (int) d;
 	}
 	
 	public static DMatrixN zero(int n) {
@@ -67,6 +70,10 @@ public class DMatrixN {
 	
 	public void set(int i, int j, double val) {
 		a[i * n + j] = val;
+	}
+	
+	public void add(int i, int j, double val) {
+		a[i * n + j] += val;
 	}
 	
 	public DMatrixN transpose() {
@@ -100,6 +107,151 @@ public class DMatrixN {
 			res.add(i / n, a[i] * v.get(i % n));
 		}
 		return res;
+	}
+	
+	/**
+	 * Solves an equation of the form a x = b
+	 * 
+	 * @param a n x n symmetrix matrix
+	 * @param b n-dimensional vector
+	 * @return x, an n-dimensional vector satisfying a x = b
+	 */
+	public static DVectorN solve(DMatrixN a, DVectorN b) {
+		Augmented m = new Augmented(new DMatrixN(a), new DVectorN(b));
+		int col = 0;
+		all: for (int i = 0; i < m.a.n - 1; i++) {
+			while (m.a.get(i, col) == 0) {
+				if (col == m.a.n)
+					break all;
+				if (m.swapNonzero(i, col))
+					break;
+				col++;
+			}
+			for (int j = i + 1; j < m.a.n; j++) {
+				m.eliminate(i, j, col);
+			}
+		}
+		for (int i = m.a.n - 1; i > 0; i--) {
+			for (int j = i - 1; j >= 0; j--) {
+				m.eliminate(i, j, i);
+			}
+		}
+		m.normalize();
+		return m.b;
+	}
+	
+	private static class Augmented {
+		DMatrixN a;
+		DVectorN b;
+		
+		Augmented(DMatrixN a, DVectorN b) {
+			this.a = a;
+			this.b = b;
+		}
+		
+		/**
+		 * Called as the last step, assuming a is now diagonal
+		 */
+		void normalize() {
+			for (int i = 0; i < b.dim(); i++) {
+				b.set(i, b.get(i) / a.get(i, i));
+			}
+		}
+		
+		void swap(int i, int j) {
+			a.swapRows(i, j);
+			double c = b.get(i);
+			b.set(i, b.get(j));
+			b.set(j, c);
+		}
+		
+		/**
+		 * Called on a row/col location that is supposed to be nonzero, but is zero.
+		 * If there is a nonzero element below this, the two rows are swapped an this
+		 * returns true, meaning linear independence could potentially still be preserved,
+		 * otherwise it returns false, meaning there are only zeros below this element.
+		 * 
+		 * @param row
+		 * @param col
+		 * @return whether or not a swap was performed
+		 */
+		boolean swapNonzero(int row, int col) {
+			for (int i = row + 1; i < a.n; i++) {
+				if (a.get(i, col) != 0) {
+					swap(i, row);
+					return true;
+				}
+			}
+			return false;
+		}
+		
+		void eliminate(int row, int to, int col) {
+			add(row, -a.get(to, col) / a.get(row, col), to);
+		}
+		
+		void add(int row, double scale, int to) {
+			for (int i = 0; i < a.n; i++) {
+				a.add(to, i, scale * a.get(row, i));
+			}
+			b.add(to, b.get(row) * scale);
+		}
+		
+		public String toString() {
+			String ret = "";
+			for (int i = 0; i < a.n; i++) {
+				for (int j = 0; j < a.n; j++)
+					ret += round(a.get(i, j)) + "\t";
+				ret += ":  " + b.get(i) + "\n";
+			}
+			return ret;
+		}
+	}
+	
+	public DMatrixN gaussian() {
+		DMatrixN ret = new DMatrixN(this);
+		double factor;
+		for (int i = 0; i < n - 1; i++) {
+			for (int j = i + 1; j < n; j++) {
+				if (ret.get(i, i) == 0) {
+					boolean f = false;
+					for (int q = i + 1; q < n; q++) {
+						if (ret.get(q, i) != 0) {
+							ret.swapRows(i, q);
+							f = true;
+							break;
+						}
+					}
+					if (!f) {
+						continue;
+					}
+				}
+				factor = ret.get(j, i) / ret.get(i, i);
+				for (int k = i; k < n; k++)
+					ret.set(j, k, ret.get(j, k) - factor * ret.get(i, k));
+			}
+		}
+		return ret;
+	}
+	
+	private void swapRows(int i, int j) {
+		double s;
+		for (int a = 0; a < n; a++) {
+			s = get(i, a);
+			set(i, a, get(j, a));
+			set(j, a, s);
+		}
+	}
+	
+	public boolean positiveDefinite() {
+		return gaussian().positiveDiagonals();
+	}
+	
+	public boolean positiveDiagonals() {
+		for (int i = 0; i < a.length; i += n + 1) {
+			if (a[i] <= 0)
+				return false;
+		}
+		return true;
 	}
 	
 	public String toString() {

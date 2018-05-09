@@ -19,6 +19,12 @@ public class DVectorN {
 		v = args;
 	}
 	
+	public DVectorN(DVectorN v) {
+		this.v = new double[v.dim()];
+		for (int i = 0; i < this.v.length; i++)
+			this.v[i] = v.get(i);
+	}
+	
 	public double get(int i) {
 		return v[i];
 	}
