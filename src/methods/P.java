@@ -6,7 +6,7 @@ public class P {
 		System.out.print(s);
 	}
 	
-	public static void pl() {
+	public static void l() {
 		System.out.println();
 	}
 	

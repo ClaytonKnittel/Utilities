@@ -72,7 +72,7 @@ public class MatrixAlgorithms {
 	 */
 	private static DVectorN solveConstrainedEqnHelper(DMatrixN a, DVectorN b, LinkedList<Integer> c, LinkedList<Integer> nc, DVectorN f, int i) {
 		if (i == b.dim()) {
-			P.pl("d: " + a.multiply(f).plus(b));
+//			P.pl("d: " + a.multiply(f).plus(b));
 			return f;
 		}
 		

@@ -130,7 +130,7 @@ public class DVector2 {
 	}
 	
 	public String toString() {
-		return "(" + round(x) + ", " + round(y) + ")";
+		return "(" + x + ", " + round(y) + ")";
 	}
 	
 }

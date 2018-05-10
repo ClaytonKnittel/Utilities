@@ -194,6 +194,10 @@ public class InteractionSet<E, I extends Reversible<I>> {
 			return null;
 		}
 		
+		public I connector() {
+			return connector;
+		}
+		
 		/**
 		 * 
 		 * @param which the element of the node of one end of this connection
