@@ -78,12 +78,13 @@ public class MatrixAlgorithms {
 		
 		DVectorN d = a.multiply(f).plus(b);
 		DMatrixN ac = a.partitionedMatrix(c);
-		DVectorN an = a.getColPart(i, c);
-		DVectorN cv = DMatrixN.solve(ac, an.times(-1));
-		P.pl("\nIteration: " + i + "\nC: " + c + "\nNC: " + nc + "\nd: " + d + "\nac:\n" + ac + "\nan: " + an + "\ncv: " + cv + "\nf: " + f + "\n");
+		DVectorN aCol = a.getColPart(i, c);
+		DVectorN aRow = a.getRowPart(i, c);
+		DVectorN cv = DMatrixN.solve(ac, aCol.times(-1));
+		//P.pl("\nIteration: " + i + "\nC: " + c + "\nNC: " + nc + "\nd: " + d + "\nac:\n" + ac + "\nan: " + aCol + "\ncv: " + cv + "\nf: " + f + "\n");
 		
-		double s = -d.get(i) / (an.dot(cv) + 1);
-		P.pl("S: " + s);
+		double s = -d.get(i) / (aRow.dot(cv) + a.get(i, i));
+//		P.pl("S: " + s);
 		if (s <= 0) {
 			nc.add(i);
 			return solveConstrainedEqnHelper(a, b, c, nc, f, i + 1);
@@ -97,7 +98,7 @@ public class MatrixAlgorithms {
 		int p = 0;
 		for (Integer e : c) {
 			calc = -f.get(e) / cv.get(p++);
-			P.pl("C: " + e +  " " + calc);
+//			P.pl("C: " + e +  " " + calc);
 			if (calc < s && calc >= 0) {
 				s = calc;
 				loc = e;
@@ -106,7 +107,7 @@ public class MatrixAlgorithms {
 		}
 		for (Integer e : nc) {
 			calc = -d.get(e) / (a.getRowPart(e, c).dot(cv) + 1);
-			P.pl("NC: " + e +  " " + calc);
+//			P.pl("NC: " + e +  " " + calc);
 			if (calc < s && calc >= 0) {
 				s = calc;
 				loc = e;
