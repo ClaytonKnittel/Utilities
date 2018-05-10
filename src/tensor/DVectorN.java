@@ -25,6 +25,17 @@ public class DVectorN {
 			this.v[i] = v.get(i);
 	}
 	
+	public static <T> DVectorN functionalMap(T[] elements, Map<T> map) {
+		DVectorN r = new DVectorN(elements.length);
+		for (int i = 0; i < elements.length; i++)
+			r.set(i, map.val(elements[i]));
+		return r;
+	}
+	
+	public static interface Map<T> {
+		double val(T t);
+	}
+	
 	public double get(int i) {
 		return v[i];
 	}
@@ -33,7 +44,7 @@ public class DVectorN {
 		v[i] = val;
 	}
 	
-	protected void add(int i, double val) {
+	public void add(int i, double val) {
 		v[i] += val;
 	}
 	
@@ -69,6 +80,18 @@ public class DVectorN {
 		return ret;
 	}
 	
+	public void scale(double s) {
+		for (int i = 0; i < v.length; i++)
+			v[i] *= s;
+	}
+	
+	public DVectorN times(double s) {
+		DVectorN ret = new DVectorN(this.v.length);
+		for (int i = 0; i < this.v.length; i++)
+			ret.v[i] = v[i] * s;
+		return ret;
+	}
+	
 	public double dot(DVectorN v) {
 		verifySize(v, "dot");
 		double ret = 0;
@@ -91,11 +114,13 @@ public class DVectorN {
 	}
 	
 	public String toString() {
+		if (v.length == 0)
+			return "[]";
 		String ret = "[";
 		for (int i = 0; i < v.length - 1; i++) {
 			ret += round(v[i]) + ", ";
 		}
-		return ret + v[v.length - 1] + "]";
+		return ret + round(v[v.length - 1]) + "]";
 	}
 	
 }

@@ -21,6 +21,21 @@ public class InteractionSet<E, I extends Reversible<I>> {
 		this.elements = new HashMap<>();
 		for (E e : elements)
 			this.elements.put(e, new Node(e));
+		this.allConnections = new LinkedList<>();
+	}
+	
+	public boolean empty() {
+		return allConnections.isEmpty();
+	}
+	
+	public int size() {
+		return allConnections.size();
+	}
+	
+	public void clear() {
+		allConnections.clear();
+		for (Node n : elements.values())
+			n.clear();
 	}
 	
 	/**
@@ -60,6 +75,10 @@ public class InteractionSet<E, I extends Reversible<I>> {
 			n.visit();
 			
 			List<Connection<E, I>> list = getAll(n, new LinkedList<>());
+			
+			if (list.size() == 0)
+				continue;
+			
 			c = (Connection[]) Array.newInstance(Connection.class, list.size());
 			list.toArray(c);
 			groupList.add(c);
@@ -122,6 +141,10 @@ public class InteractionSet<E, I extends Reversible<I>> {
 			visited = false;
 		}
 		
+		void clear() {
+			connections.clear();
+		}
+		
 		@Override
 		public int hashCode() {
 			return val.hashCode();
@@ -166,7 +189,9 @@ public class InteractionSet<E, I extends Reversible<I>> {
 		T to(T which) {
 			if (from == which)
 				return to;
-			return from;
+			if (to == which)
+				return from;
+			return null;
 		}
 		
 		/**
@@ -177,7 +202,9 @@ public class InteractionSet<E, I extends Reversible<I>> {
 		public I connector(T which) {
 			if (from == which)
 				return connector;
-			return connector.reverse();
+			if (to == which)
+				return connector.reverse();
+			return null;
 		}
 	}
 }

@@ -1,6 +1,7 @@
 package structures;
 
 import java.util.LinkedList;
+import java.util.List;
 
 public class Web<E> {
 	
@@ -8,6 +9,13 @@ public class Web<E> {
 	
 	public Web() {
 		elements = new LinkedList<>();
+	}
+	
+	public List<E> toList() {
+		List<E> ret = new LinkedList<>();
+		for (Node<E> e : elements)
+			ret.add(e.val);
+		return ret;
 	}
 	
 	public void add(E e) {

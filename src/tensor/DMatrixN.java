@@ -1,5 +1,7 @@
 package tensor;
 
+import java.util.List;
+
 /**
  * A class of square matrices.
  * 
@@ -11,7 +13,7 @@ public class DMatrixN {
 	private double[] a;
 	protected int n;
 	
-	protected static int acc = 3; // how many digits to round matrices to when printing, setting to 0 means don't round
+	protected static int acc = 5; // how many digits to round matrices to when printing, setting to 0 means don't round
 	
 	private static int mul;
 	
@@ -22,6 +24,7 @@ public class DMatrixN {
 			mul *= 10;
 	}
 	
+	@SuppressWarnings("unused")
 	private DMatrixN() {}
 	
 	/**
@@ -98,6 +101,36 @@ public class DMatrixN {
 		a[i * n + j] += val;
 	}
 	
+	public DVectorN getRow(int row) {
+		DVectorN ret = new DVectorN(n);
+		for (int i = 0; i < n; i++)
+			ret.set(i, get(row, i));
+		return ret;
+	}
+	
+	public DVectorN getRowPart(int row, List<Integer> elsToInclude) {
+		DVectorN ret = new DVectorN(elsToInclude.size());
+		int i = 0;
+		for (Integer l : elsToInclude)
+			ret.set(i++, get(row, l));
+		return ret;
+	}
+	
+	public DVectorN getCol(int col) {
+		DVectorN ret = new DVectorN(n);
+		for (int i = 0; i < n; i++)
+			ret.set(i, get(i, col));
+		return ret;
+	}
+	
+	public DVectorN getColPart(int col, List<Integer> elsToInclude) {
+		DVectorN ret = new DVectorN(elsToInclude.size());
+		int i = 0;
+		for (Integer l : elsToInclude)
+			ret.set(i++, get(l, col));
+		return ret;
+	}
+	
 	public DMatrixN transpose() {
 		DMatrixN r = zero(n);
 		for (int i = 0; i < a.length; i++) {
@@ -129,6 +162,24 @@ public class DMatrixN {
 			res.add(i / n, a[i] * v.get(i % n));
 		}
 		return res;
+	}
+	
+	/**
+	 * 
+	 * @param elsToInclude which indices to include in the partitioned matrix
+	 * @return a matrix containing only elements whose row and column numbers are in elsToInclude
+	 */
+	public DMatrixN partitionedMatrix(List<Integer> elsToInclude) {
+		DMatrixN part = new DMatrixN(elsToInclude.size(), false);
+		int row = 0, col;
+		for (Integer i : elsToInclude) {
+			col = 0;
+			for (Integer j : elsToInclude) {
+				part.set(row, col++, get(i, j));
+			}
+			row++;
+		}
+		return part;
 	}
 	
 	/**

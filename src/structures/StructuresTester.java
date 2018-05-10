@@ -14,7 +14,7 @@ public class StructuresTester {
 		set.add(new Connector(5), 1, 5);
 		set.add(new Connector(6), 2, 3);
 		set.add(new Connector(7), 2, 3);
-		set.add(new Connector(8), 2, 3);
+		set.add(new Connector(8), 10, 5);
 		
 		LinkedList<Connection<Integer, Connector>[]> list = set.groups();
 		

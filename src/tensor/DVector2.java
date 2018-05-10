@@ -95,7 +95,7 @@ public class DVector2 {
 		return x * v.y - y * v.x;
 	}
 	
-	public DVector2 crossPerpendicular(double zMag) {
+	public DVector2 crossPerp(double zMag) {
 		return new DVector2(y * zMag, -x * zMag);
 	}
 	
