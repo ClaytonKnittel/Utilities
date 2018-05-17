@@ -64,17 +64,17 @@ public class InteractionSet<E, I extends Reversible<I>> {
 	 * @return a list of the coupled groups of this InteractionSet
 	 */
 	@SuppressWarnings("unchecked")
-	public LinkedList<Connection<E, I>[]> groups() {
+	public LinkedList<Connection<E, I>[]> groups(ConnectionRule<E> r) {
 		
 		LinkedList<Connection<E, I>[]> groupList = new LinkedList<>();
 		Connection<E, I>[] c;
 		
 		for (Node n : elements.values()) {
-			if (n.visited)
+			if (n.visited || !r.propagatesForce(n.val))
 				continue;
 			n.visit();
 			
-			List<Connection<E, I>> list = getAll(n, new LinkedList<>());
+			List<Connection<E, I>> list = getAll(n, new LinkedList<>(), r);
 			
 			if (list.size() == 0)
 				continue;
@@ -92,20 +92,48 @@ public class InteractionSet<E, I extends Reversible<I>> {
 		return groupList;
 	}
 	
+	public LinkedList<Connection<E, I>[]> groups() {
+		return groups(b -> true);
+	}
+	
+	/**
+	 * Describes which elements in the InteractionSet should be allowed to be
+	 * connectors in groups and which shouldn't. If, for example, even numbers
+	 * are force propagators, but odd numbers aren't. then in the set:
+	 * <br>
+	 * 1, 2, 3, 4, 5
+	 * <br>
+	 * with connections
+	 * <br>
+	 * 1->2, 2->3, 3->4, 4->5
+	 * <br>
+	 * the groups would be:
+	 * {(1, 2, 3), (3, 4, 5)}
+	 * 
+	 * @author claytonknittel
+	 *
+	 * @param <E>
+	 */
+	public static interface ConnectionRule<E> {
+		boolean propagatesForce(E e);
+	}
+	
 	/**
 	 * 
 	 * @param root
 	 * @param ret an empty list
 	 * @return a list of all connections stemming from the root node
 	 */
-	private LinkedList<Connection<E, I>> getAll(Node root, LinkedList<Connection<E, I>> ret) {
+	private LinkedList<Connection<E, I>> getAll(Node root, LinkedList<Connection<E, I>> ret, ConnectionRule<E> r) {
 		for (Connection<Node, I> c : root.connections) {
 			Node to = c.to(root);
 			if (c.passed)
 				continue;
 			c.pass();
+			
 			ret.add(new Connection<>(c.connector, c.from.val, c.to.val));
-			getAll(to, ret);
+			if (r.propagatesForce(to.val))
+				getAll(to, ret, r);
 		}
 		return ret;
 	}
@@ -209,6 +237,10 @@ public class InteractionSet<E, I extends Reversible<I>> {
 			if (to == which)
 				return connector.reverse();
 			return null;
+		}
+		
+		public String toString() {
+			return "(" + from + " -> " + to + ")";
 		}
 	}
 }

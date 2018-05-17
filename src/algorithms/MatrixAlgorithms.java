@@ -2,7 +2,6 @@ package algorithms;
 
 import java.util.LinkedList;
 
-import methods.P;
 import tensor.DMatrixN;
 import tensor.DVectorN;
 
@@ -28,7 +27,12 @@ public class MatrixAlgorithms {
 	 * @return f, the set of (commonly) forces that satisfy d = a f + b for a > 0, f > 0, a.f = 0
 	 */
 	public static DVectorN solveConstrainedEqn(DMatrixN a, DVectorN b) {
-		return solveConstrainedEqnHelper(a, b, new LinkedList<>(), new LinkedList<>(), new DVectorN(b.dim()), 0);
+		try {
+			return solveConstrainedEqnHelper(a, b, new LinkedList<>(), new LinkedList<>(), new DVectorN(b.dim()), 0);
+		} catch (StackOverflowError e) {
+			System.err.println("Tried to solve: \n" + a + "\n = " + b);
+		}
+		return new DVectorN(b.dim());
 	}
 	
 	/**
@@ -37,7 +41,7 @@ public class MatrixAlgorithms {
 	 * group the first n - 1 forces into 2 categories, contact (C) (a = 0) and no
 	 * contact (NC) (f = 0).
 	 * <p>
-	 * To solve, first start with f<sub>n</sub> = 0, then, while an < 0 and all of the conditions are
+	 * To solve, first start with f<sub>n</sub> = 0, then, while a<sub>n</sub> < 0 and all of the conditions are
 	 * maintained, continually increase f. If one of the conditions is broken, this means
 	 * either a C point reached zero force or an NC point reached zero acceleration. To rectify this,
 	 * move the C point to the NC set or the NC point to the C set and keep going. If a<sub>n</sub> = 0, then we
@@ -72,7 +76,6 @@ public class MatrixAlgorithms {
 	 */
 	private static DVectorN solveConstrainedEqnHelper(DMatrixN a, DVectorN b, LinkedList<Integer> c, LinkedList<Integer> nc, DVectorN f, int i) {
 		if (i == b.dim()) {
-//			P.pl("d: " + a.multiply(f).plus(b));
 			return f;
 		}
 		
@@ -80,11 +83,9 @@ public class MatrixAlgorithms {
 		DMatrixN ac = a.partitionedMatrix(c);
 		DVectorN aCol = a.getColPart(i, c);
 		DVectorN aRow = a.getRowPart(i, c);
-		DVectorN cv = DMatrixN.solve(ac, aCol.times(-1));
-		//P.pl("\nIteration: " + i + "\nC: " + c + "\nNC: " + nc + "\nd: " + d + "\nac:\n" + ac + "\nan: " + aCol + "\ncv: " + cv + "\nf: " + f + "\n");
+		DVectorN cv = DMatrixN.solve(ac, aCol.times(-1)); // solves for the changes ci given delta fn = 1
 		
 		double s = -d.get(i) / (aRow.dot(cv) + a.get(i, i));
-//		P.pl("S: " + s);
 		if (s <= 0) {
 			nc.add(i);
 			return solveConstrainedEqnHelper(a, b, c, nc, f, i + 1);
@@ -97,8 +98,11 @@ public class MatrixAlgorithms {
 		
 		int p = 0;
 		for (Integer e : c) {
-			calc = -f.get(e) / cv.get(p++);
-//			P.pl("C: " + e +  " " + calc);
+			double num = cv.get(p++);
+			if (num >= 0)
+				continue;
+			
+			calc = -f.get(e) / num;
 			if (calc < s && calc >= 0) {
 				s = calc;
 				loc = e;
@@ -106,8 +110,11 @@ public class MatrixAlgorithms {
 			}
 		}
 		for (Integer e : nc) {
-			calc = -d.get(e) / (a.getRowPart(e, c).dot(cv) + 1);
-//			P.pl("NC: " + e +  " " + calc);
+			double num = a.getRowPart(e, c).dot(cv) + 1;
+			if (num >= 0)
+				continue;
+			
+			calc = -d.get(e) / num;
 			if (calc < s && calc >= 0) {
 				s = calc;
 				loc = e;
@@ -134,6 +141,10 @@ public class MatrixAlgorithms {
 				nc.remove((Integer) loc);
 				c.add(loc);
 			}
+		}
+		
+		if (s == 0.0) {
+			System.out.println("FE " + a + b + f);
 		}
 		
 		return solveConstrainedEqnHelper(a, b, c, nc, f, i);
