@@ -2,6 +2,8 @@ package tensor;
 
 import java.util.List;
 
+import methods.P;
+
 /**
  * A class of square matrices.
  * 
@@ -203,6 +205,7 @@ public class DMatrixN {
 			for (int j = i + 1; j < m.a.n; j++) {
 				m.eliminate(i, j, col);
 			}
+			col++;
 		}
 		for (int i = m.a.n - 1; i > 0; i--) {
 			for (int j = i - 1; j >= 0; j--) {

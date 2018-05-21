@@ -94,11 +94,9 @@ public class MatrixAlgorithms {
 //		P.pl("NC: " + nc);
 //		P.pl("a col: " + aCol);
 //		P.pl("a row: " + aRow);
+//		P.pl("ac*cv + aCol = 0:\n" + ac + "\n* " + cv + "\n+ " + aCol);
+//		P.pl("SHOULD BE ZERO: " + ac.multiply(cv).plus(aCol));
 //		P.pl("cv: " + cv);
-//		
-//		P.pl("S = -(" + d.get(i) + ") / " + (aRow.dot(cv) + a.get(i, i)));
-//		P.pl("denom: " + aRow + " . " + cv + " + " + (a.get(i, i)));
-//		P.pl("Denom = " + aRow.dot(cv) + " + " + a.get(i, i));
 		
 		if (d.get(i) >= 0) {
 			nc.add(i);
@@ -106,6 +104,7 @@ public class MatrixAlgorithms {
 		}
 		double denom = aRow.dot(cv) + a.get(i, i);
 		double s = -d.get(i) / denom;
+//		P.pl("S = " + s);
 		if (s <= 0) {
 			nc.add(i);
 			return solveConstrainedEqnHelper(a, b, c, nc, f, i + 1);
@@ -159,10 +158,7 @@ public class MatrixAlgorithms {
 //			P.pl("\n");
 //		}
 		
-		if (s == Double.POSITIVE_INFINITY) {
-			System.out.println("Equation: \n" + a + "\nB: " + b + "\n" + cv + "\n" + d);
-			System.exit(0);
-		}
+//		P.pl("Final s: " + s);
 		
 		cv.scale(s);
 		int el = 0;
