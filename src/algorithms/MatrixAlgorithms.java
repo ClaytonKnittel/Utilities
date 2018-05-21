@@ -2,6 +2,7 @@ package algorithms;
 
 import java.util.LinkedList;
 
+import methods.P;
 import tensor.DMatrixN;
 import tensor.DVectorN;
 
@@ -55,11 +56,13 @@ public class MatrixAlgorithms {
 	 * move (the normal force can only cancel other forces). If we know how f<sub>i</sub> changes relative to
 	 * f<sub>n</sub>, i.e. we know &Delta;f<sub>i</sub>=c<sub>i</sub>&Delta;f<sub>n</sub> for some c<sub>i</sub>, then it is
 	 * simply: s = -f<sub>i</sub> / &Delta;f<sub>i</sub> = -f<sub>i</sub> / c<sub>i</sub>
+	 * 
 	 * 	<li> NC: for a point in NC, we require that d + a &Delta;f >= 0 for all elements, so the maximum step size would
-	 * be s = <sup>-a<sub>i</sub></sup> / <sub>&Sigma;<sub>j &isin; C</sub> a<sub>ij</sub>c<sub>j</sub> + 1</sub> (as all c<sub>j</sub> for j &isin; NC
+	 * be s <= <sup>-d<sub>i</sub></sup> / <sub>&Sigma;<sub>j &isin; C</sub> a<sub>ij</sub>c<sub>j</sub> + a<sub>in</sub></sub> (as all c<sub>j</sub> for j &isin; NC
 	 * = 0, and c<sub>n</sub> = 1), where all c<sub>j</sub> have already been calculated (how to do so is discussed below).
+	 * 
 	 * 	<li> for f<sub>n</sub> itself, the maximum we can change is constrained by s = <sup>-a<sub>n</sub></sup> /
-	 * <sub>&Sigma;<sub>j &isin; C</sub> a<sub>nj</sub>c<sub>j</sub> + 1</sub>
+	 * <sub>&Sigma;<sub>j &isin; C</sub> a<sub>nj</sub>c<sub>j</sub> + a<sub>nn</sub></sub>
 	 * </ul>
 	 * <p>
 	 * To compute all c<sub>i</sub>, we partition a into A<sub>C</sub>, being the A matrix only consisting of elements corresponding
@@ -85,12 +88,28 @@ public class MatrixAlgorithms {
 		DVectorN aRow = a.getRowPart(i, c);
 		DVectorN cv = DMatrixN.solve(ac, aCol.times(-1)); // solves for the changes ci given delta fn = 1
 		
-		double s = -d.get(i) / (aRow.dot(cv) + a.get(i, i));
+//		P.pl("\nForces: " + f);
+//		System.out.println("Accels: " + d);
+//		P.pl("C: " + c);
+//		P.pl("NC: " + nc);
+//		P.pl("a col: " + aCol);
+//		P.pl("a row: " + aRow);
+//		P.pl("cv: " + cv);
+//		
+//		P.pl("S = -(" + d.get(i) + ") / " + (aRow.dot(cv) + a.get(i, i)));
+//		P.pl("denom: " + aRow + " . " + cv + " + " + (a.get(i, i)));
+//		P.pl("Denom = " + aRow.dot(cv) + " + " + a.get(i, i));
+		
+		if (d.get(i) >= 0) {
+			nc.add(i);
+			return solveConstrainedEqnHelper(a, b, c, nc, f, i + 1);
+		}
+		double denom = aRow.dot(cv) + a.get(i, i);
+		double s = -d.get(i) / denom;
 		if (s <= 0) {
 			nc.add(i);
 			return solveConstrainedEqnHelper(a, b, c, nc, f, i + 1);
 		}
-		
 		
 		int loc = i;
 		double calc;
@@ -103,25 +122,47 @@ public class MatrixAlgorithms {
 				continue;
 			
 			calc = -f.get(e) / num;
-			if (calc < s && calc >= 0) {
+//			P.pl("C: " + e + "   " + calc + " = -(" + d.get(e) + ") / " + num);
+			if (calc < s && calc > 0) {
 				s = calc;
 				loc = e;
 				inC = true;
+			} else if (f.get(e) == 0) {
+				nc.add(e);
+				c.remove((Integer) e);
+				return solveConstrainedEqnHelper(a, b, c, nc, f, i);
 			}
 		}
 		for (Integer e : nc) {
-			double num = a.getRowPart(e, c).dot(cv) + 1;
+			double num = a.getRowPart(e, c).dot(cv) + a.get(e, i);
 			if (num >= 0)
 				continue;
 			
 			calc = -d.get(e) / num;
-			if (calc < s && calc >= 0) {
+//			P.pl("NC: " + e + "   " + calc + " = -(" + d.get(e) + ") / " + num);
+			if (calc < s && calc > 0) {
 				s = calc;
 				loc = e;
 				inC = false;
+			} else if (d.get(e) == 0) {
+				c.add(e);
+				nc.remove((Integer) e);
+				return solveConstrainedEqnHelper(a, b, c, nc, f, i);
 			}
 		}
 		
+//		if (s > 10000) {
+//			P.pl("eqn: \n" + a + "\nb: " + b);
+//			P.pl(d + "   " + i);
+//			P.pl("Forces: " + f);
+//			P.pl("denom: " + denom);
+//			P.pl("\n");
+//		}
+		
+		if (s == Double.POSITIVE_INFINITY) {
+			System.out.println("Equation: \n" + a + "\nB: " + b + "\n" + cv + "\n" + d);
+			System.exit(0);
+		}
 		
 		cv.scale(s);
 		int el = 0;

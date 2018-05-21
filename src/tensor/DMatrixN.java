@@ -13,7 +13,7 @@ public class DMatrixN {
 	private double[] a;
 	protected int n;
 	
-	protected static int acc = 5; // how many digits to round matrices to when printing, setting to 0 means don't round
+	protected static int acc = 4; // how many digits to round matrices to when printing, setting to 0 means don't round
 	
 	private static int mul;
 	

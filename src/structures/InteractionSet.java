@@ -7,21 +7,40 @@ import java.util.List;
 
 public class InteractionSet<E, I extends Reversible<I>> {
 	
+	private Node[] nodes;
 	private HashMap<E, Node> elements;
 	private LinkedList<Connection<Node, I>> allConnections;
 	
+	@SuppressWarnings("unchecked")
 	public InteractionSet(E[] elements) {
 		this.elements = new HashMap<>();
-		for (E e : elements)
-			this.elements.put(e, new Node(e));
 		this.allConnections = new LinkedList<>();
+		if (elements.length == 0) {
+			nodes = null;
+			return;
+		}
+		nodes = (Node[]) Array.newInstance(new Node(elements[0]).getClass(), elements.length);
+		int i = 0;
+		for (E e : elements)
+			this.nodes[i++] = new Node(e);
+		for (Node n : nodes)
+			this.elements.put(n.val, n);
 	}
 	
+	@SuppressWarnings("unchecked")
 	public InteractionSet(List<E> elements) {
 		this.elements = new HashMap<>();
-		for (E e : elements)
-			this.elements.put(e, new Node(e));
 		this.allConnections = new LinkedList<>();
+		if (elements.size() == 0) {
+			nodes = null;
+			return;
+		}
+		nodes = (Node[]) Array.newInstance(new Node(elements.get(0)).getClass(), elements.size());
+		int i = 0;
+		for (E e : elements)
+			this.nodes[i++] = new Node(e);
+		for (Node n : nodes)
+			this.elements.put(n.val, n);
 	}
 	
 	public boolean empty() {
@@ -34,7 +53,7 @@ public class InteractionSet<E, I extends Reversible<I>> {
 	
 	public void clear() {
 		allConnections.clear();
-		for (Node n : elements.values())
+		for (Node n : nodes)
 			n.clear();
 	}
 	
@@ -67,21 +86,20 @@ public class InteractionSet<E, I extends Reversible<I>> {
 	public LinkedList<Connection<E, I>[]> groups(ConnectionRule<E> r) {
 		
 		LinkedList<Connection<E, I>[]> groupList = new LinkedList<>();
-		Connection<E, I>[] c;
 		
 		for (Node n : elements.values()) {
 			if (n.visited || !r.propagatesForce(n.val))
 				continue;
 			n.visit();
 			
-			List<Connection<E, I>> list = getAll(n, new LinkedList<>(), r);
+			LinkedList<Connection<E, I>> list = getAll(n, new LinkedList<>(), r);
 			
 			if (list.size() == 0)
 				continue;
 			
-			c = (Connection[]) Array.newInstance(Connection.class, list.size());
-			list.toArray(c);
-			groupList.add(c);
+			Connection<E, I>[] l = (Connection<E, I>[]) Array.newInstance(list.get(0).getClass(), list.size());
+			l = list.toArray(l);
+			groupList.add(l);
 		}
 		
 		for (Node n : elements.values())
