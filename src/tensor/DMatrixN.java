@@ -2,7 +2,9 @@ package tensor;
 
 import java.util.List;
 
-import methods.P;
+import org.jblas.DoubleMatrix;
+import org.jblas.Solve;
+
 
 /**
  * A class of square matrices.
@@ -12,8 +14,7 @@ import methods.P;
  */
 public class DMatrixN {
 	
-	private double[] a;
-	protected int n;
+	protected DoubleMatrix m;
 	
 	protected static int acc = 4; // how many digits to round matrices to when printing, setting to 0 means don't round
 	
@@ -41,25 +42,32 @@ public class DMatrixN {
 	}
 	
 	private DMatrixN(int n, boolean setIdentity) {
-		a = new double[n * n];
-		this.n = n;
 		if (setIdentity)
-			setIdentity();
+			m = DoubleMatrix.eye(n);
+		else
+			m = new DoubleMatrix(n, n);
 	}
 	
 	public DMatrixN(DMatrixN m) {
-		a = new double[m.a.length];
-		n = m.n;
-		for (int i = 0; i < a.length; i++)
-			a[i] = m.a[i];
+		this.m = new DoubleMatrix(m.m.rows, m.m.columns);
+		for (int i = 0; i < this.m.length; i++)
+			this.m.data[i] = m.m.data[i];
 	}
 	
-	public DMatrixN(double...args) {
-		double d = Math.round(Math.sqrt(args.length));
-		if ((int) d != d)
-			throw new IllegalArgumentException("DMatrixN matrices must be square");
-		a = args;
-		n = (int) d;
+	public DMatrixN(int rows, int cols, double...args) {
+		m = new DoubleMatrix(rows, cols, args);
+	}
+	
+	protected DMatrixN(DoubleMatrix d) {
+		this.m = d;
+	}
+	
+	public static DMatrixN rand(int w) {
+		return new DMatrixN(DoubleMatrix.rand(w, w));
+	}
+	
+	public static DMatrixN rand(int rows, int cols) {
+		return new DMatrixN(DoubleMatrix.rand(rows, cols));
 	}
 	
 	public static DMatrixN zero(int n) {
@@ -86,26 +94,21 @@ public class DMatrixN {
 		double interact(E e1, E e2);
 	}
 	
-	private void setIdentity() {
-		for (int i = 0; i < a.length; i += n + 1)
-			a[i] = 1;
-	}
-	
 	public double get(int i, int j) {
-		return a[i * n + j];
+		return m.data[i * m.columns + j];
 	}
 	
 	public void set(int i, int j, double val) {
-		a[i * n + j] = val;
+		m.data[i * m.columns + j] = val;
 	}
 	
 	public void add(int i, int j, double val) {
-		a[i * n + j] += val;
+		m.data[i * m.columns + j] += val;
 	}
 	
 	public DVectorN getRow(int row) {
-		DVectorN ret = new DVectorN(n);
-		for (int i = 0; i < n; i++)
+		DVectorN ret = new DVectorN(m.columns);
+		for (int i = 0; i < m.columns; i++)
 			ret.set(i, get(row, i));
 		return ret;
 	}
@@ -119,8 +122,8 @@ public class DMatrixN {
 	}
 	
 	public DVectorN getCol(int col) {
-		DVectorN ret = new DVectorN(n);
-		for (int i = 0; i < n; i++)
+		DVectorN ret = new DVectorN(m.rows);
+		for (int i = 0; i < m.rows; i++)
 			ret.set(i, get(i, col));
 		return ret;
 	}
@@ -134,36 +137,17 @@ public class DMatrixN {
 	}
 	
 	public DMatrixN transpose() {
-		DMatrixN r = zero(n);
-		for (int i = 0; i < a.length; i++) {
-			r.a[(i % n) * n + (i / n)] = a[i];
-		}
-		return r;
+		return new DMatrixN(m.transpose());
 	}
 	
 	public DMatrixN multiply(DMatrixN m) {
-		if (n != m.n)
-			throw new IllegalArgumentException("Cannot multiply matrix of dimension " + n + " x " + n + " with matrix of dimension " + m.n + " x " + m.n);
-		DMatrixN res = zero(n);
-		int t, o; // offsets for this and m, respectively
-		for (int i = 0; i < a.length; i++) {
-			t = i / n * n;
-			o = i % n;
-			for (int j = 0; j < n; j++) {
-				res.a[i] += a[t + j] * m.a[o + n * j];
-			}
-		}
-		return res;
+		return new DMatrixN(this.m.mmul(m.m));
 	}
 	
 	public DVectorN multiply(DVectorN v) {
-		if (v.dim() != n)
-			throw new IllegalArgumentException("Cannot multiply matrix of dimension " + n + " x " + n + " with vector of dimension " + v.dim());
-		DVectorN res = new DVectorN(n);
-		for (int i = 0; i < a.length; i++) {
-			res.add(i / n, a[i] * v.get(i % n));
-		}
-		return res;
+		if (v.dim() != m.columns)
+			throw new IllegalArgumentException("Cannot multiply matrix of dimension " + m.rows + " x " + m.columns + " with vector of dimension " + v.dim());
+		return new DVectorN(m.mmul(v.v));
 	}
 	
 	/**
@@ -192,151 +176,127 @@ public class DMatrixN {
 	 * @return x, an n-dimensional vector satisfying a x = b
 	 */
 	public static DVectorN solve(DMatrixN a, DVectorN b) {
-		Augmented m = new Augmented(new DMatrixN(a), new DVectorN(b));
-		int col = 0;
-		all: for (int i = 0; i < m.a.n - 1; i++) {
-			while (m.a.get(i, col) == 0) {
-				if (col == m.a.n)
-					break all;
-				if (m.swapNonzero(i, col))
-					break;
-				col++;
-			}
-			for (int j = i + 1; j < m.a.n; j++) {
-				m.eliminate(i, j, col);
-			}
-			col++;
-		}
-		for (int i = m.a.n - 1; i > 0; i--) {
-			for (int j = i - 1; j >= 0; j--) {
-				m.eliminate(i, j, i);
-			}
-		}
-		m.normalize();
-		return m.b;
+		if (a.m.length == 0)
+			return new DVectorN(0);
+		return new DVectorN(Solve.solve(a.m, b.v));
 	}
 	
-	private static class Augmented {
-		DMatrixN a;
-		DVectorN b;
-		
-		Augmented(DMatrixN a) {
-			this(a, null);
-		}
-		
-		Augmented(DMatrixN a, DVectorN b) {
-			this.a = a;
-			this.b = b;
-		}
-		
-		/**
-		 * Called as the last step, assuming a is now diagonal
-		 */
-		void normalize() {
-			for (int i = 0; i < b.dim(); i++) {
-				b.set(i, b.get(i) / a.get(i, i));
-			}
-		}
-		
-		void swap(int i, int j) {
-			a.swapRows(i, j);
-			if (b != null) {
-				double c = b.get(i);
-				b.set(i, b.get(j));
-				b.set(j, c);
-			}
-		}
-		
-		/**
-		 * Called on a row/col location that is supposed to be nonzero, but is zero.
-		 * If there is a nonzero element below this, the two rows are swapped an this
-		 * returns true, meaning linear independence could potentially still be preserved,
-		 * otherwise it returns false, meaning there are only zeros below this element.
-		 * 
-		 * @param row
-		 * @param col
-		 * @return whether or not a swap was performed
-		 */
-		boolean swapNonzero(int row, int col) {
-			for (int i = row + 1; i < a.n; i++) {
-				if (a.get(i, col) != 0) {
-					swap(i, row);
-					return true;
-				}
-			}
-			return false;
-		}
-		
-		void eliminate(int row, int to, int col) {
-			add(row, -a.get(to, col) / a.get(row, col), to);
-		}
-		
-		void add(int row, double scale, int to) {
-			for (int i = 0; i < a.n; i++) {
-				a.add(to, i, scale * a.get(row, i));
-			}
-			if (b != null)
-				b.add(to, b.get(row) * scale);
-		}
-		
-		public String toString() {
-			String ret = "";
-			for (int i = 0; i < a.n; i++) {
-				for (int j = 0; j < a.n; j++)
-					ret += round(a.get(i, j)) + "\t";
-				if (b != null)
-					ret += ":  " + b.get(i);
-				ret += "\n";
-			}
-			return ret;
-		}
-	}
+//	private static DVectorN oldSolve(DMatrixN a, DVectorN b) {
+//		Augmented m = new Augmented(new DMatrixN(a), new DVectorN(b));
+//		int col = 0;
+//		all: for (int i = 0; i < m.a.m.rows - 1; i++) {
+//			while (m.a.get(i, col) == 0) {
+//				if (col == m.a.m.columns)
+//					break all;
+//				if (m.swapNonzero(i, col))
+//					break;
+//				col++;
+//			}
+//			for (int j = i + 1; j < m.a.m.rows; j++) {
+//				m.eliminate(i, j, col);
+//			}
+//			col++;
+//		}
+//		for (int i = m.a.m.rows - 1; i > 0; i--) {
+//			for (int j = i - 1; j >= 0; j--) {
+//				m.eliminate(i, j, i);
+//			}
+//		}
+//		m.normalize();
+//		return m.b;
+//	}
 	
-	public DMatrixN gaussian() {
-		Augmented m = new Augmented(new DMatrixN(this));
-		int col = 0;
-		all: for (int i = 0; i < m.a.n - 1; i++) {
-			while (m.a.get(i, col) == 0) {
-				if (col == m.a.n)
-					break all;
-				if (m.swapNonzero(i, col))
-					break;
-				col++;
-			}
-			for (int j = i + 1; j < m.a.n; j++) {
-				m.eliminate(i, j, col);
-			}
-		}
-		return m.a;
-	}
+//	private static class Augmented {
+//		DMatrixN a;
+//		DVectorN b;
+//		
+//		Augmented(DMatrixN a) {
+//			this(a, null);
+//		}
+//		
+//		Augmented(DMatrixN a, DVectorN b) {
+//			this.a = a;
+//			this.b = b;
+//		}
+//		
+//		/**
+//		 * Called as the last step, assuming a is now diagonal
+//		 */
+//		void normalize() {
+//			for (int i = 0; i < b.dim(); i++) {
+//				b.set(i, b.get(i) / a.get(i, i));
+//			}
+//		}
+//		
+//		void swap(int i, int j) {
+//			a.swapRows(i, j);
+//			if (b != null) {
+//				double c = b.get(i);
+//				b.set(i, b.get(j));
+//				b.set(j, c);
+//			}
+//		}
+//		
+//		/**
+//		 * Called on a row/col location that is supposed to be nonzero, but is zero.
+//		 * If there is a nonzero element below this, the two rows are swapped an this
+//		 * returns true, meaning linear independence could potentially still be preserved,
+//		 * otherwise it returns false, meaning there are only zeros below this element.
+//		 * 
+//		 * @param row
+//		 * @param col
+//		 * @return whether or not a swap was performed
+//		 */
+//		boolean swapNonzero(int row, int col) {
+//			for (int i = row + 1; i < a.m.columns; i++) {
+//				if (a.get(i, col) != 0) {
+//					swap(i, row);
+//					return true;
+//				}
+//			}
+//			return false;
+//		}
+//		
+//		void eliminate(int row, int to, int col) {
+//			add(row, -a.get(to, col) / a.get(row, col), to);
+//		}
+//		
+//		void add(int row, double scale, int to) {
+//			for (int i = 0; i < a.m.columns; i++) {
+//				a.add(to, i, scale * a.get(row, i));
+//			}
+//			if (b != null)
+//				b.add(to, b.get(row) * scale);
+//		}
+//		
+//		public String toString() {
+//			String ret = "";
+//			for (int i = 0; i < a.m.rows; i++) {
+//				for (int j = 0; j < a.m.columns; j++)
+//					ret += round(a.get(i, j)) + "\t";
+//				if (b != null)
+//					ret += ":  " + b.get(i);
+//				ret += "\n";
+//			}
+//			return ret;
+//		}
+//	}
 	
-	private void swapRows(int i, int j) {
-		double s;
-		for (int a = 0; a < n; a++) {
-			s = get(i, a);
-			set(i, a, get(j, a));
-			set(j, a, s);
-		}
-	}
-	
-	public boolean positiveDefinite() {
-		return gaussian().positiveDiagonals();
-	}
-	
-	public boolean positiveDiagonals() {
-		for (int i = 0; i < a.length; i += n + 1) {
-			if (a[i] <= 0)
-				return false;
-		}
-		return true;
-	}
+//	private void swapRows(int i, int j) {
+//		double s;
+//		for (int a = 0; a < m.columns; a++) {
+//			s = get(i, a);
+//			set(i, a, get(j, a));
+//			set(j, a, s);
+//		}
+//	}
 	
 	public String toString() {
 		String ret = "";
-		for (int i = 0; i < n; i++) {
-			for (int j = 0; j < n; j++)
+		for (int i = 0; i < m.rows; i++) {
+			for (int j = 0; j < m.columns; j++)
 				ret += round(get(i, j)) + "\t";
-			ret += i < n - 1 ? "\n" : "";
+			ret += i < m.rows - 1 ? "\n" : "";
 		}
 		return ret;
 	}

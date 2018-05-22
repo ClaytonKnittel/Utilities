@@ -2,9 +2,13 @@ package tensor;
 
 import static tensor.DMatrixN.round;
 
+import org.jblas.DoubleMatrix;
+
+import methods.P;
+
 public class DVectorN {
 	
-	private double[] v;
+	protected DoubleMatrix v;
 	
 	/**
 	 * Creates a new DVectorN of dimension n
@@ -12,17 +16,25 @@ public class DVectorN {
 	 * @param n
 	 */
 	public DVectorN(int n) {
-		v = new double[n];
+		v = new DoubleMatrix(n);
 	}
 	
 	public DVectorN(double...args) {
-		v = args;
+		v = new DoubleMatrix(args.length, 1, args);
 	}
 	
 	public DVectorN(DVectorN v) {
-		this.v = new double[v.dim()];
+		this.v = new DoubleMatrix(v.dim());
 		for (int i = 0; i < this.v.length; i++)
-			this.v[i] = v.get(i);
+			this.v.data[i] = v.v.data[i];
+	}
+	
+	protected DVectorN(DoubleMatrix v) {
+		this.v = v;
+	}
+	
+	public static DVectorN rand(int len) {
+		return new DVectorN(DoubleMatrix.rand(len));
 	}
 	
 	public static <T> DVectorN functionalMap(T[] elements, Map<T> map) {
@@ -37,15 +49,15 @@ public class DVectorN {
 	}
 	
 	public double get(int i) {
-		return v[i];
+		return v.data[i];
 	}
 	
 	public void set(int i, double val) {
-		v[i] = val;
+		v.data[i] = val;
 	}
 	
 	public void add(int i, double val) {
-		v[i] += val;
+		v.data[i] += val;
 	}
 	
 	public int dim() {
@@ -54,58 +66,40 @@ public class DVectorN {
 	
 	public void add(DVectorN v) {
 		verifySize(v, "addition");
-		for (int i = 0; i < this.v.length; i++)
-			this.v[i] += v.v[i];
+		this.v = this.v.add(v.v);
 	}
 	
 	public DVectorN plus(DVectorN v) {
 		verifySize(v, "addition");
-		DVectorN ret = new DVectorN(this.v.length);
-		for (int i = 0; i < this.v.length; i++)
-			ret.v[i] = this.v[i] + v.v[i];
-		return ret;
+		return new DVectorN(this.v.add(v.v));
 	}
 	
 	public void sub(DVectorN v) {
 		verifySize(v, "subtraction");
-		for (int i = 0; i < this.v.length; i++)
-			this.v[i] -= v.v[i];
+		this.v = this.v.sub(v.v);
 	}
 	
 	public DVectorN minus(DVectorN v) {
 		verifySize(v, "subtraction");
-		DVectorN ret = new DVectorN(this.v.length);
-		for (int i = 0; i < this.v.length; i++)
-			ret.v[i] = this.v[i] - v.v[i];
-		return ret;
+		return new DVectorN(this.v.sub(v.v));
 	}
 	
 	public void scale(double s) {
-		for (int i = 0; i < v.length; i++)
-			v[i] *= s;
+		this.v = this.v.mul(s);
 	}
 	
 	public DVectorN times(double s) {
-		DVectorN ret = new DVectorN(this.v.length);
-		for (int i = 0; i < this.v.length; i++)
-			ret.v[i] = v[i] * s;
-		return ret;
+		return new DVectorN(this.v.mul(s));
 	}
 	
 	public double dot(DVectorN v) {
 		verifySize(v, "dot");
-		double ret = 0;
-		for (int i = 0; i < this.v.length; i++)
-			ret += this.v[i] * v.v[i];
-		return ret;
+		return this.v.dot(v.v);
 	}
 	
 	public DVectorN prod(DVectorN v) {
 		verifySize(v, "hadamard product");
-		DVectorN ret = new DVectorN(this.v.length);
-		for (int i = 0; i < this.v.length; i++)
-			ret.v[i] = this.v[i] * v.v[i];
-		return ret;
+		return new DVectorN(this.v.mul(v.v));
 	}
 	
 	private void verifySize(DVectorN other, String operation) {
@@ -118,9 +112,9 @@ public class DVectorN {
 			return "[]";
 		String ret = "[";
 		for (int i = 0; i < v.length - 1; i++) {
-			ret += round(v[i]) + ", ";
+			ret += round(v.data[i]) + ", ";
 		}
-		return ret + round(v[v.length - 1]) + "]";
+		return ret + round(v.data[v.length - 1]) + "]";
 	}
 	
 }

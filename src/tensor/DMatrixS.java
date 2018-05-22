@@ -136,24 +136,6 @@ public class DMatrixS {
 		return L;
 	}
 	
-	/**
-	 * @return the upper triangle of this matrix after it has been gaussian-eliminated
-	 */
-	public DMatrixN gaussian() {
-		DMatrixN ret = this.toDMatrixN();
-		return ret.gaussian();
-	}
-	
-	/**
-	 * Gaussian eliminate this matrix, ignoring all below the diagonals, as these
-	 * don't matter when determining if a matrix is positive definite.
-	 * 
-	 * @return whether or not this matrix is positive definite
-	 */
-	public boolean positiveDefinite() {
-		return this.toDMatrixN().positiveDefinite();
-	}
-	
 	public boolean positiveDiagonals() {
 		int s = 0;
 		for (int i = n; i > 0; i--) {
