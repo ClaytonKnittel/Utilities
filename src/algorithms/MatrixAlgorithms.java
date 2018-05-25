@@ -86,7 +86,13 @@ public class MatrixAlgorithms {
 		DMatrixN ac = a.partitionedMatrix(c);
 		DVectorN aCol = a.getColPart(i, c);
 		DVectorN aRow = a.getRowPart(i, c);
-		DVectorN cv = DMatrixN.solve(ac, aCol.times(-1)); // solves for the changes ci given delta fn = 1
+		DVectorN cv = null;
+		try {
+			cv = DMatrixN.solve(ac, aCol.times(-1)); // solves for the changes ci given delta fn = 1
+		} catch (org.jblas.exceptions.LapackException e) {
+			e.printStackTrace();
+			P.pl("The singular matrix:\n" + ac);
+		}
 		
 //		P.pl("\nForces: " + f);
 //		System.out.println("Accels: " + d);
