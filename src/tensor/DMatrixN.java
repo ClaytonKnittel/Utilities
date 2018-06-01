@@ -58,7 +58,7 @@ public class DMatrixN {
 		m = new DoubleMatrix(rows, cols, args);
 	}
 	
-	protected DMatrixN(DoubleMatrix d) {
+	public DMatrixN(DoubleMatrix d) {
 		this.m = d;
 	}
 	

@@ -1,98 +1,110 @@
 package algorithms;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import methods.P;
 import structures.Graph;
 import structures.Heap;
+import structures.ValGraph;
 
-public class Dijkstra<T> {
+public class Dijkstra<T, V extends Number> {
 	
-	private Graph<T> graph;
-	private HashMap<Graph<T>.GraphEdge, Float> weights;
-	
-	public static void main(String args[]) {
-		LinkedList<Integer> i = new LinkedList<>();
-		i.add(1);
-		i.add(2);
-		i.add(3);
-		i.add(4);
-		i.add(5);
-		i.add(6);
-		i.add(7);
-		i.add(8);
-		i.add(9);
-		i.add(10);
-		Dijkstra<Integer> d = new Dijkstra<>(i);
-		d.addEdge(1, 9, 18);
-		d.addEdge(1, 4, 12);
-		d.addEdge(1, 6, 7);
-		d.addEdge(9, 2, 9);
-		d.addEdge(2, 4, 8);
-		d.addEdge(6, 5, 8);
-		d.addEdge(4, 5, 3);
-		d.addEdge(4, 3, 6);
-		d.addEdge(5, 10, 9);
-		d.addEdge(3, 7, 4);
-		d.addEdge(3, 8, 10);
-		P.pl(d.shortestPath(6, 8));
-	}
+	private ValGraph<T, V> graph;
 	
 	public Dijkstra(List<T> nodes) {
-		graph = new Graph<T>(nodes);
-		this.weights = new HashMap<>();
+		graph = new ValGraph<>(nodes);
 	}
 	
-	public void addEdge(T from, T to, float weight) {
-		Graph<T>.GraphEdge edge = graph.addEdge(from, to);
-		Graph<T>.GraphEdge edge2 = graph.addEdge(to, from);
-		weights.put(edge, weight);
-		weights.put(edge2, weight);
+	public Dijkstra(ValGraph<T, V> graph) {
+		this.graph = graph;
 	}
 	
-	public LinkedList<T> shortestPath(T start, T finish) {
+	public void addDirEdge(T from, T to, V weight) {
+		graph.addDirEdge(from, to, weight);
+	}
+	
+	public void addEdge(T from, T to, V weight) {
+		graph.addEdge(from, to, weight);
+	}
+	
+	public String toString() {
+		return graph.toString();
+	}
+	
+	@SuppressWarnings("unchecked")
+	public void condense() {
+		LinkedList<Graph<T>.GraphNode> toRemove = new LinkedList<>();
+		
+		for (Graph<T>.GraphNode node : graph.nodes()) {
+			if (node.numConnections() == 2) {
+				Iterator<Graph<T>.GraphEdge> i = node.edges().iterator();
+				Graph<T>.GraphNode one = i.next().to();
+				Graph<T>.GraphNode two = i.next().to();
+				Graph<T>.GraphEdge e1 = one.removeConnection(node);
+				Graph<T>.GraphEdge e2 = two.removeConnection(node);
+				graph.addEdge(one.val(), two.val(), ((Addable<V>) graph.val(e1)).add(graph.val(e2)));
+				toRemove.add(node);
+			}
+		}
+		for (Graph<T>.GraphNode n : toRemove)
+			graph.remove(n);
+	}
+	
+	public LinkedList<V> shortestPath(T start, T finish) {
 		Heap<Distance> heap = new Heap<>(graph.numEdges(), new Distance(null), (e1, e2) -> e1.compareTo(e2));
 		HashMap<Graph<T>.GraphNode, Distance> map = new HashMap<>(graph.size());
 		
+		boolean first = false;
 		for (Graph<T>.GraphNode node : graph.nodes()) {
 			Distance d = new Distance(node);
-			if (node.val() == start)
+			if (node.val().equals(start)) {
 				d.decrease(0);
+				first = true;
+			}
 			heap.add(d);
 			map.put(node, d);
 		}
 		
+		if (!first)
+			throw new IllegalStateException("No such node " + start);
+		
 		Distance end = map.get(graph.getNode(finish));
+		if (end == null)
+			throw new IllegalStateException("No such node " + finish);
 		
 		while (!heap.isEmpty()) {
 			Distance d = heap.extractMax();
-			if (d == end)
+			if (d.equals(end))
 				break;
 			findAll(d, end, heap, map);
 		}
 		
-		LinkedList<T> path = new LinkedList<>();
+		LinkedList<V> path = new LinkedList<>();
 		
 		if (end.discoverer == null && start != finish)
 			throw new IllegalStateException("Path from " + start + " to " + finish + " does not exist.");
 		
-		do {
-			path.addFirst(end.val.val());
-			end = end.discoverer;
-		} while (end != null);
+		while (true) {
+			if (end.discoverer == null)
+				break;
+			path.addFirst(graph.val(end.discoverer));
+			end = map.get(end.discoverer.from());
+		}
 		
 		return path;
 		
 	}
 	
 	private void findAll(Distance node, Distance end, Heap<Distance> heap, Map<Graph<T>.GraphNode, Distance> dist) {
+		if (node.dist == -1)
+			return;
 		for (Graph<T>.GraphEdge e : node.val.edges()) {
 			Distance d = dist.get(e.to());
-			if (d.decrease(node.dist + weights.get(e))) {
-				d.discoverer = node;
+			if (d.decrease(node.dist + graph.val(e).floatValue())) {
+				d.discoverer = e;
 				heap.decrease(d);
 			}
 		}
@@ -100,7 +112,7 @@ public class Dijkstra<T> {
 	
 	private class Distance implements Comparable<Distance> {
 		Graph<T>.GraphNode val;
-		Distance discoverer;
+		Graph<T>.GraphEdge discoverer;
 		float dist;
 		
 		Distance(Graph<T>.GraphNode val) {
@@ -130,6 +142,10 @@ public class Dijkstra<T> {
 		public String toString() {
 			return "" + dist;
 		}
+	}
+	
+	public static interface Addable<T> {
+		T add(T o);
 	}
 	
 }

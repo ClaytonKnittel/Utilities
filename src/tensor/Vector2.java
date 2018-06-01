@@ -25,6 +25,10 @@ public class Vector2 {
 		this(v.x, v.y);
 	}
 	
+	public Vector2(IVector2 v) {
+		this(v.x, v.y);
+	}
+	
 	public float x() {
 		return x;
 	}
@@ -47,6 +51,10 @@ public class Vector2 {
 		this.y = y;
 	}
 	
+	public Vector2 plus(float x, float y) {
+		return new Vector2(this.x + x, this.y + y);
+	}
+	
 	public Vector2 plus(Vector2 v) {
 		return new Vector2(x + v.x, y + v.y);
 	}
@@ -56,6 +64,10 @@ public class Vector2 {
 		y += v.y;
 	}
 	
+	
+	public Vector2 minus(float x, float y) {
+		return new Vector2(this.x - x, this.y - y);
+	}
 	
 	public Vector2 minus(Vector2 v) {
 		return new Vector2(x - v.x, y - v.y);

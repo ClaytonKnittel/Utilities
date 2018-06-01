@@ -41,6 +41,10 @@ public class Heap<T> {
 		loc = 1;
 	}
 	
+	public int size() {
+		return loc - 1;
+	}
+	
 	public boolean isEmpty() {
 		return loc == 1;
 	}
@@ -138,7 +142,7 @@ public class Heap<T> {
 		}
 		
 		public String toString() {
-			return val + " " + loc;
+			return val + "";
 		}
 	}
 	

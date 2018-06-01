@@ -31,6 +31,13 @@ public class Graph<T> {
 		return edges.getLast();
 	}
 	
+	public void remove(GraphNode node) {
+		for (GraphEdge e : node.edgesTo)
+			edges.remove(e);
+		this.nodes.remove(node.val);
+		node.clearConnections();
+	}
+	
 	public Iterable<GraphNode> nodes() {
 		return nodes.values();
 	}
@@ -52,15 +59,22 @@ public class Graph<T> {
 	}
 	
 	
+	public String toString() {
+		String ret = "";
+		for (GraphEdge e : edges)
+			ret += e.toString() + "\n";
+		return ret;
+	}
+	
 	
 	public class GraphNode {
 		
 		private T val;
-		private LinkedList<GraphEdge> edges;
+		private LinkedList<GraphEdge> edgesTo;
 		
 		public GraphNode(T val) {
 			this.val = val;
-			this.edges = new LinkedList<>();
+			this.edgesTo = new LinkedList<>();
 		}
 		
 		public T val() {
@@ -68,11 +82,44 @@ public class Graph<T> {
 		}
 		
 		public void addEdgeTo(GraphEdge e) {
-			this.edges.add(e);
+			this.edgesTo.add(e);
 		}
 		
 		public Iterable<GraphEdge> edges() {
-			return edges;
+			return edgesTo;
+		}
+		
+		public int numConnections() {
+			return edgesTo.size();
+		}
+		
+		@SuppressWarnings("unlikely-arg-type")
+		public GraphEdge removeConnection(GraphNode node) {
+			int i = edgesTo.indexOf(node);
+			GraphEdge e = edgesTo.remove(i);
+			edges.remove(e);
+			return e;
+		}
+		
+		public void clearConnections() {
+			this.edgesTo.clear();
+		}
+		
+		public String toString() {
+			return val + " " + edgesTo;
+		}
+		
+		public String partString() {
+			return val + "";
+		}
+		
+		@SuppressWarnings("unchecked")
+		public boolean equals(Object o) {
+			if (o instanceof Graph.GraphNode)
+				return o == this;
+			if (!(o instanceof Graph.GraphEdge))
+				return false;
+			return ((GraphEdge) o).to == this;
 		}
 		
 	}
@@ -93,6 +140,20 @@ public class Graph<T> {
 		
 		public GraphNode to() {
 			return to;
+		}
+		
+		@SuppressWarnings("unchecked")
+		public boolean equals(Object o) {
+			if (o instanceof Graph.GraphEdge)
+				return this == o;
+			if (!(o instanceof Graph.GraphNode))
+				return false;
+			GraphNode n = (GraphNode) o;
+			return to == n;
+		}
+		
+		public String toString() {
+			return from.partString() + " -> " + to.partString();
 		}
 		
 	}
