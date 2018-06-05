@@ -53,12 +53,17 @@ public class Dijkstra<T, V extends Number> {
 			graph.remove(n);
 	}
 	
-	public LinkedList<V> shortestPath(T start, T finish) {
+	@SuppressWarnings("unchecked")
+	public LinkedList<V> shortestPath(T start, T finish, T... exclusions) {
 		Heap<Distance> heap = new Heap<>(graph.numEdges(), new Distance(null), (e1, e2) -> e1.compareTo(e2));
 		HashMap<Graph<T>.GraphNode, Distance> map = new HashMap<>(graph.size());
 		
 		boolean first = false;
-		for (Graph<T>.GraphNode node : graph.nodes()) {
+		next: for (Graph<T>.GraphNode node : graph.nodes()) {
+			for (T t : exclusions) {
+				if (t.equals(node.val()))
+					continue next;
+			}
 			Distance d = new Distance(node);
 			if (node.val().equals(start)) {
 				d.decrease(0);
@@ -79,7 +84,7 @@ public class Dijkstra<T, V extends Number> {
 			Distance d = heap.extractMax();
 			if (d.equals(end))
 				break;
-			findAll(d, end, heap, map);
+			findAll(d, heap, map);
 		}
 		
 		LinkedList<V> path = new LinkedList<>();
@@ -98,11 +103,13 @@ public class Dijkstra<T, V extends Number> {
 		
 	}
 	
-	private void findAll(Distance node, Distance end, Heap<Distance> heap, Map<Graph<T>.GraphNode, Distance> dist) {
+	private void findAll(Distance node, Heap<Distance> heap, Map<Graph<T>.GraphNode, Distance> dist) {
 		if (node.dist == -1)
 			return;
 		for (Graph<T>.GraphEdge e : node.val.edges()) {
 			Distance d = dist.get(e.to());
+			if (d == null)
+				continue;
 			if (d.decrease(node.dist + graph.val(e).floatValue())) {
 				d.discoverer = e;
 				heap.decrease(d);
