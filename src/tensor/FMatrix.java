@@ -42,8 +42,16 @@ public class FMatrix {
 		return m.columns;
 	}
 	
+	public float[] data() {
+		return m.data;
+	}
+	
 	public float get(int i, int j) {
 		return m.get(i, j);
+	}
+	
+	public void set(int i, int j, float val) {
+		m.data[i * m.columns + j] = val;
 	}
 	
 	public void add(FMatrix other) {

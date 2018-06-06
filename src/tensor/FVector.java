@@ -28,6 +28,10 @@ public class FVector {
 		return v.get(i);
 	}
 	
+	public void set(int i, float val) {
+		v.data[i] = val;
+	}
+	
 	public int size() {
 		return v.length;
 	}

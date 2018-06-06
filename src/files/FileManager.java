@@ -6,7 +6,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -21,6 +20,43 @@ public class FileManager {
 	public static String readAll(String fileName) throws IOException {
 	    List<String> lines = Files.readAllLines(new File(fileName).toPath());
 	    return String.join("\n", lines.toArray(new String[lines.size()]));
+	}
+	
+	public static LinkedList<String> toList(String location) {
+		File file = new File(location);
+		if (!file.exists())
+			try { file.createNewFile(); } catch (IOException e) {}
+		FileReader reader;
+		try {
+			reader = new FileReader(file);
+		} catch (FileNotFoundException e) {
+			System.err.println("no such file");
+			return null;
+		}
+		LinkedList<String> buf = new LinkedList<>();
+		
+		String add = "";
+		int next;
+		try {
+			do {
+				switch (next = reader.read()) {
+				case -1:
+				case '\n':
+					buf.add(add);
+					add = "";
+					break;
+				default:
+					add += (char) next;
+				}
+			} while (next != -1);
+		} catch (IOException e) {
+			System.err.println("error while reading file");
+		}
+		
+		try { reader.close(); } catch (IOException e) {
+			System.err.println("could not close file");
+		}
+		return buf;
 	}
 	
 	public static String[] toString(String location) {
@@ -160,6 +196,20 @@ public class FileManager {
 			file.createNewFile();
 			FileWriter writer = new FileWriter(file);
 			writer.write(toString(info));
+			writer.close();
+		} catch (IOException e) { System.err.println("Couldn't save"); }
+	}
+	
+	public static void save(List<String> info, String location) {
+		File file = new File(location);
+		if (file.exists())
+			file.delete();
+		try {
+			file.createNewFile();
+			FileWriter writer = new FileWriter(file);
+			int l = 0;
+			for (String s : info)
+				writer.write(s + (++l < info.size() ? "\n" : ""));
 			writer.close();
 		} catch (IOException e) { System.err.println("Couldn't save"); }
 	}
