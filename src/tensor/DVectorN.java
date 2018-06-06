@@ -4,8 +4,6 @@ import static tensor.DMatrixN.round;
 
 import org.jblas.DoubleMatrix;
 
-import methods.P;
-
 public class DVectorN {
 	
 	protected DoubleMatrix v;
