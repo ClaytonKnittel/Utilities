@@ -14,4 +14,12 @@ public class P {
 		System.out.println(s);
 	}
 	
+	public static void err(Object s) {
+		System.err.print(s);
+	}
+	
+	public static void errln(Object s) {
+		System.err.println(s);
+	}
+	
 }

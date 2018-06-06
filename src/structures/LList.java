@@ -221,6 +221,15 @@ public class LList<E> extends AbstractSequentialList<E> implements List<E>, Dequ
 		modCount++;
 		return element;
 	}
+	
+	public void removeNode(Node<E> n) {
+		if (n == first)
+			unlinkFirst(n);
+		else if (n == last)
+			unlinkLast(n);
+		else
+			unlink(n);
+	}
 
 	/**
 	 * Returns the first element in this list.
@@ -234,6 +243,14 @@ public class LList<E> extends AbstractSequentialList<E> implements List<E>, Dequ
 		if (f == null)
 			throw new NoSuchElementException();
 		return f.item;
+	}
+	
+	public Node<E> getFirstNode() {
+		return first;
+	}
+	
+	public Node<E> getLastNode() {
+		return last;
 	}
 
 	/**
@@ -577,7 +594,7 @@ public class LList<E> extends AbstractSequentialList<E> implements List<E>, Dequ
 	/**
 	 * Returns the (non-null) Node at the specified element index.
 	 */
-	Node<E> node(int index) {
+	public Node<E> node(int index) {
 		// assert isElementIndex(index);
 
 		if (index < (size >> 1)) {
@@ -1112,7 +1129,7 @@ public class LList<E> extends AbstractSequentialList<E> implements List<E>, Dequ
 		boolean delete(E e);
 	}
 
-	private static class Node<E> {
+	public static class Node<E> {
 		E item;
 		Node<E> next;
 		Node<E> prev;
@@ -1121,6 +1138,18 @@ public class LList<E> extends AbstractSequentialList<E> implements List<E>, Dequ
 			this.item = element;
 			this.next = next;
 			this.prev = prev;
+		}
+		
+		public E item() {
+			return item;
+		}
+		
+		public Node<E> next() {
+			return next;
+		}
+		
+		public Node<E> prev() {
+			return prev;
 		}
 		
 		public String toString() {
@@ -1335,7 +1364,27 @@ public class LList<E> extends AbstractSequentialList<E> implements List<E>, Dequ
 			n = n.next;
 		}
 	}
-
+	
+	public float sumPairs(PairVal<E> p) {
+		Node<E> n = first;
+		Node<E> o;
+		float sum = 0;
+		while (n != null) {
+			o = n.next;
+			while (o != null) {
+				sum += p.val(n.item, o.item);
+				o = o.next;
+			}
+			n = n.next;
+		}
+		return sum;
+	}
+	
+	public static interface PairVal<E> {
+		float val(E e1, E e2);
+	}
+	
+	
 	private static final long serialVersionUID = 876323262645176354L;
 
 	/**

@@ -26,7 +26,7 @@ public class Network {
 	 */
 	protected FMatrix[] weights;
 	
-	protected Network(int... sizes) {
+	public Network(int... sizes) {
 		weights = new FMatrix[sizes.length - 1];
 		activations = new FVector[sizes.length];
 		for (int i = 0; i < weights.length; i++)
@@ -133,6 +133,33 @@ public class Network {
 	 */
 	public void input() {
 		input(input);
+	}
+	
+	public int size(int layer) {
+		return activations[layer].size() - (layer < activations.length - 1 ? 1 : 0);
+	}
+	
+	public boolean[] choices() {
+		boolean[] ret = new boolean[output().size()];
+		for (int i = 0; i < ret.length; i++) {
+			if (output().get(i) > .5f)
+				ret[i] = true;
+		}
+		return ret;
+	}
+	
+	public int maxOutput() {
+		int loc = 0;
+		float max = output().get(0);
+		float v;
+		for (int i = 1; i < output().size(); i++) {
+			v = output().get(i);
+			if (v > max) {
+				max = v;
+				loc = i;
+			}
+		}
+		return loc;
 	}
 	
 	public String toString() {
