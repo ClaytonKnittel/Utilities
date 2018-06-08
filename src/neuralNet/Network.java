@@ -20,6 +20,9 @@ public class Network {
 	protected NetworkInput input;
 	
 	protected FVector[] activations;
+	private int[] sizes;
+	
+	private int totalWeights, totalNeurons;
 	
 	/**
 	 * Top neuron in prev. layer is considered bias and is always 1
@@ -27,12 +30,26 @@ public class Network {
 	protected FMatrix[] weights;
 	
 	public Network(int... sizes) {
+		this.sizes = sizes;
 		weights = new FMatrix[sizes.length - 1];
 		activations = new FVector[sizes.length];
 		for (int i = 0; i < weights.length; i++)
 			weights[i] = FMatrix.rand(sizes[i + 1], sizes[i] + 1, 1);
 		for (int i = 0; i < activations.length; i++)
 			activations[i] = new FVector(sizes[i] + (i < weights.length ? 1 : 0));
+		computeTotals();
+	}
+	
+	public Network(Network n) {
+		this.sizes = n.sizes;
+		this.activations = new FVector[sizes.length];
+		this.weights = new FMatrix[activations.length - 1];
+		this.input = n.input;
+		for (int i = 0; i < activations.length; i++)
+			activations[i] = new FVector(n.activations[i]);
+		for (int i = 0; i < weights.length; i++)
+			weights[i] = new FMatrix(n.weights[i]);
+		computeTotals();
 	}
 	
 	/**
@@ -102,6 +119,23 @@ public class Network {
 		FileManager.save(s, location);
 	}
 	
+	private void computeTotals() {
+		totalNeurons = activations.length - 1;
+		for (int i : sizes)
+			totalNeurons += i;
+		totalWeights = 0;
+		for (FMatrix m : weights)
+			totalWeights += m.length();
+	}
+	
+	public int totalNeurons() {
+		return totalNeurons;
+	}
+	
+	public int totalWeights() {
+		return totalWeights;
+	}
+	
 	public void set(NetworkInput c) {
 		input = c;
 	}
@@ -136,7 +170,23 @@ public class Network {
 	}
 	
 	public int size(int layer) {
-		return activations[layer].size() - (layer < activations.length - 1 ? 1 : 0);
+		return sizes[layer];
+	}
+	
+	public int[] sizes() {
+		return sizes;
+	}
+	
+	public FVector getLayer(int layer) {
+		return activations[layer];
+	}
+	
+	public FMatrix getWeights(int layer) {
+		return weights[layer];
+	}
+	
+	public int layers() {
+		return activations.length;
 	}
 	
 	public boolean[] choices() {

@@ -45,6 +45,9 @@ public class SupervisedNet extends Network {
 		
 		changes[layer] = changes[layer].minus(v.outer(activations[layer]));
 		
+		if (layer == 0)
+			return;
+		
 		FVector vp = new FVector(weights[layer].transpose().multiply(v).mul(dSigmoidInvSigmoid(activations[layer]))).removeTopRow();
 		backPropagate(layer - 1, vp);
 	}

@@ -4,9 +4,7 @@ public interface Breed {
 	
 	Breed breed(Breed other);
 	
-	void mutate();
-	
-	float fitness();
+	Breed mutate();
 	
 	/**
 	 * 
@@ -15,5 +13,11 @@ public interface Breed {
 	 * mean they are not very similar.
 	 */
 	float similarity(Breed other);
+	
+	/**
+	 * to subtract off the fitness (thus should be positive), used for regularization / encouraging or discouraging a certain trait.
+	 * @return
+	 */
+	float subtractor();
 	
 }

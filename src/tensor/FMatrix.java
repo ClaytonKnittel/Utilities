@@ -3,6 +3,7 @@ package tensor;
 import static tensor.DMatrixN.round;
 
 import org.jblas.FloatMatrix;
+import org.jblas.MatrixFunctions;
 
 public class FMatrix {
 	
@@ -13,6 +14,10 @@ public class FMatrix {
 	 */
 	public FMatrix(int r, int c) {
 		m = new FloatMatrix(r, c);
+	}
+	
+	public FMatrix(FMatrix m) {
+		this(m.m);
 	}
 	
 	protected FMatrix(FloatMatrix m) {
@@ -34,6 +39,14 @@ public class FMatrix {
 		m = FloatMatrix.zeros(m.rows, m.columns);
 	}
 	
+	public float sumParts() {
+		return m.sum();
+	}
+	
+	public float sumAbs() {
+		return MatrixFunctions.abs(m).sum();
+	}
+	
 	public int rows() {
 		return m.rows;
 	}
@@ -42,12 +55,24 @@ public class FMatrix {
 		return m.columns;
 	}
 	
+	public int length() {
+		return m.length;
+	}
+	
 	public float[] data() {
 		return m.data;
 	}
 	
+	public float get(int i) {
+		return m.get(i);
+	}
+	
 	public float get(int i, int j) {
 		return m.get(i, j);
+	}
+	
+	public void set(int i, float val) {
+		m.data[i] = val;
 	}
 	
 	public void set(int i, int j, float val) {

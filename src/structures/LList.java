@@ -94,6 +94,12 @@ public class LList<E> extends AbstractSequentialList<E> implements List<E>, Dequ
 	 */
 	public LList() {
 	}
+	
+	@SafeVarargs
+	public LList(E... els) {
+		for (E e : els)
+			add(e);
+	}
 
 	/**
 	 * Constructs a list containing the elements of the specified collection, in the
@@ -1009,6 +1015,95 @@ public class LList<E> extends AbstractSequentialList<E> implements List<E>, Dequ
 		}
 	}
 	
+	public Iterable<Node<E>> nodes() {
+		return new NodeIter(0);
+	}
+	
+	private class NodeIter implements ListIterator<Node<E>>, Iterable<Node<E>> {
+		private Node<E> lastReturned;
+		private Node<E> next;
+		private int nextIndex;
+		private int expectedModCount = modCount;
+
+		NodeIter(int index) {
+			// assert isPositionIndex(index);
+			next = (index == size) ? null : node(index);
+			nextIndex = index;
+		}
+
+		public boolean hasNext() {
+			return nextIndex < size;
+		}
+
+		public Node<E> next() {
+			checkForComodification();
+			
+			lastReturned = next;
+			next = next.next;
+			nextIndex++;
+			return lastReturned;
+		}
+
+		public boolean hasPrevious() {
+			return nextIndex > 0;
+		}
+
+		public Node<E> previous() {
+			checkForComodification();
+			if (!hasPrevious())
+				throw new NoSuchElementException();
+
+			lastReturned = next = (next == null) ? last : next.prev;
+			nextIndex--;
+			return lastReturned;
+		}
+
+		public int nextIndex() {
+			return nextIndex;
+		}
+
+		public int previousIndex() {
+			return nextIndex - 1;
+		}
+
+		public void remove() {
+			checkForComodification();
+			if (lastReturned == null)
+				throw new IllegalStateException();
+
+			Node<E> lastNext = lastReturned.next;
+			unlink(lastReturned);
+			if (next == lastReturned)
+				next = lastNext;
+			else
+				nextIndex--;
+			lastReturned = null;
+			expectedModCount++;
+		}
+
+		public void set(Node<E> e) {
+			if (lastReturned == null)
+				throw new IllegalStateException();
+			checkForComodification();
+			lastReturned = e;
+		}
+
+		final void checkForComodification() {
+			if (modCount != expectedModCount)
+				throw new ConcurrentModificationException();
+		}
+
+		@Override
+		public Iterator<Node<E>> iterator() {
+			return this;
+		}
+
+		@Override
+		public void add(Node<E> e) {
+			return;
+		}
+	}
+	
 	public Iterable<E> delIter(Delete<E> del) {
 		return new DelListItr(0, del);
 	}
@@ -1382,6 +1477,29 @@ public class LList<E> extends AbstractSequentialList<E> implements List<E>, Dequ
 	
 	public static interface PairVal<E> {
 		float val(E e1, E e2);
+	}
+	
+	public LList<LList<E>> divideBy(int div) {
+		LList<LList<E>> ret = new LList<>();
+		
+		for (int i = 0; i < div; i++)
+			ret.add(new LList<>());
+		
+		Node<E> n = first;
+		Node<LList<E>> seg = ret.getFirstNode();
+		int l = 0, size = size() / div;
+		
+		while (n != null) {
+			seg.item.add(n.item);
+			
+			l++;
+			n = n.next;
+			if (l == size) {
+				l = 0;
+				seg = seg.next;
+			}
+		}
+		return ret;
 	}
 	
 	
