@@ -22,10 +22,7 @@ public class NeuralNetVisualizer {
 	
 	private static BufferStrategy b;
 	
-	private static NeuralNetVisualizer nnv;
-	
 	private static final Color high, low, chosenColor;
-	private static float[][] ins;
 	
 	private static ActionTimer t;
 	
@@ -33,67 +30,19 @@ public class NeuralNetVisualizer {
 		high = new Color(26, 240, 69);
 		low = new Color(240, 36, 34);
 		chosenColor = new Color(150, 54, 182);
-		
-		ins = new float[][] {
-			new float[] {1, 0, 0, 0, 0, 0, 0, 0},
-			new float[] {0, 1, 0, 0, 0, 0, 0, 0},
-			new float[] {0, 0, 1, 0, 0, 0, 0, 0},
-			new float[] {0, 0, 0, 1, 0, 0, 0, 0},
-			new float[] {0, 0, 0, 0, 1, 0, 0, 0},
-			new float[] {0, 0, 0, 0, 0, 1, 0, 0},
-			new float[] {0, 0, 0, 0, 0, 0, 1, 0},
-			new float[] {0, 0, 0, 0, 0, 0, 0, 1}
-		};
-		ins = new float[][] {
-			new float[] {1, 0, 0, 0, 0, 0, 0},
-			new float[] {0, 1, 0, 0, 0, 0, 0},
-			new float[] {0, 0, 1, 0, 0, 0, 0},
-			new float[] {0, 0, 0, 1, 0, 0, 0},
-			new float[] {0, 0, 0, 0, 1, 0, 0},
-			new float[] {0, 0, 0, 0, 0, 1, 0},
-			new float[] {0, 0, 0, 0, 0, 0, 1}
-		};
 	}
 	
 	public static void main(String args[]) {
-		JFrame j = new JFrame();
-		width = 800;
-		height = 600;
-		j.setSize(width, height + menuBar);
-		j.setVisible(true);
-		j.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		j.setTitle("Neural Net Visualizer");
-		
-		j.createBufferStrategy(2);
-		b = j.getBufferStrategy();
-		
-		nnv = new NeuralNetVisualizer(Network.fromFile("/users/claytonknittel/documents/workspace/practice programs/src/genetics/neuralNet"));
-		
-		last = System.currentTimeMillis();
-		
-		t = new ActionTimer();
-		t.loop();
-		t.add(() -> nnv.n.input(ins[0]), 1);
-		t.add(() -> nnv.n.input(ins[1]), 1);
-		t.add(() -> nnv.n.input(ins[2]), 1);
-		t.add(() -> nnv.n.input(ins[3]), 1);
-		t.add(() -> nnv.n.input(ins[4]), 1);
-		t.add(() -> nnv.n.input(ins[5]), 1);
-		t.add(() -> nnv.n.input(ins[6]), 1);
-//		t.add(() -> nnv.n.input(ins[7]), 1);
-		
-		
-		Thread graphics = new Thread(() -> { while (true) graphics(); });
-		graphics.start();
-		
+		NeuralNetVisualizer v = new NeuralNetVisualizer("/users/claytonknittel/documents/workspace/practice programs/src/genetics/neuralNet");
+		v.start();
 	}
 	
-	private static void graphics() {
+	private void graphics() {
 		Graphics g = b.getDrawGraphics();
 		
 		g.clearRect(0, 0, width, height);
 		t.check();
-		nnv.draw(g);
+		draw(g);
 		
 		g.dispose();
 		b.show();
@@ -107,8 +56,36 @@ public class NeuralNetVisualizer {
 		last = now;
 	}
 	
+	public NeuralNetVisualizer(String loc) {
+		this(Network.fromFile(loc));
+	}
+	
 	public NeuralNetVisualizer(Network n) {
 		this.n = n;
+		JFrame j = new JFrame();
+		width = 800;
+		height = 600;
+		j.setSize(width, height + menuBar);
+		j.setVisible(true);
+		j.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		j.setTitle("Neural Net Visualizer");
+		
+		j.createBufferStrategy(2);
+		b = j.getBufferStrategy();
+		last = System.currentTimeMillis();
+		
+		t = new ActionTimer();
+		t.loop();
+		for (int i = 0; i < n.getLayer(0).size() - 1; i++) {
+			float[] f = new float[n.getLayer(0).size() - 1];
+			f[i] = 1;
+			t.add(() -> n.input(f), 1);
+		}
+	}
+	
+	public void start() {
+		Thread graphics = new Thread(() -> { while (true) graphics(); });
+		graphics.start();
 	}
 	
 	private static Color blend(Color c1, Color c2, float percent1) {

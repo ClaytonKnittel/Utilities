@@ -208,6 +208,8 @@ public class Genetic {
 		
 		System.out.println("Running " + pop);
 		
+		float max = 0;
+		
 		do {
 			generations++;
 			clearFitness(pop);
@@ -215,19 +217,25 @@ public class Genetic {
 			sort.act(pop);
 			kill.act(pop);
 			
+			max = Math.max(max, pop.getFirst().fitness);
+			
 			if (test == SIMILARITY_TEST) {
 				addSimilarity(similarity(pop));
 				if (generations % 100 == 0)
 					P.pl("Generation " + generations + ":\tsimilarity: " + lastSim() + "\tvariance: " + varianceOfSims());
 			}
-			else if (test == BEST_PLAYER_TEST) {
-				if (generations % 100 == 0)
-					P.pl("Generation " + generations + ":\ttop player's points: " + pop.getFirst().fitness);
+			else if (test == BEST_PLAYER_TEST) { 
+				if (generations % 100 == 0) {
+					P.pl("Generation " + generations + ":\ttop player's points: " + max);
+					max = 0;
+				}
 			}
 			else {
 				addSimilarity(similarity(pop));
-				if (generations % 100 == 0)
-					P.pl("Generation " + generations + ":\ttop player's points: " + pop.getFirst().fitness);
+				if (generations % 100 == 0) {
+					P.pl("Generation " + generations + ":\ttop player's points: " + max);
+					max = 0;
+				}
 			}
 			
 			breed.act(pop);

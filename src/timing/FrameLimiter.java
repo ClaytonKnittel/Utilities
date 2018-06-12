@@ -18,7 +18,10 @@ public class FrameLimiter {
 		if (lastTime + delta > currentTime) {
 			try {
 				Thread.sleep(delta + lastTime - currentTime);
-			} catch (InterruptedException e) {}
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			lastTime += delta;
 		}
 	}
 	

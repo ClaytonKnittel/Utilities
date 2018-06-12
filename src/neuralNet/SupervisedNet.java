@@ -10,6 +10,28 @@ public class SupervisedNet extends Network {
 	
 	private float nu;
 	
+	public static void main(String args[]) {
+		SupervisedNet n = new SupervisedNet(4, 3);
+		for (int i = 0; i < 10; i++) {
+			n.input(1, 0, 0, 0);
+			n.train(0, 0, 1);
+			n.applyChanges();
+		}
+		
+		n.save("/users/claytonknittel/documents/workspace/utilities/src/neuralNet/test.txt");
+		
+		NeuralNetVisualizer v = new NeuralNetVisualizer(n);
+		v.start();
+	}
+	
+	public SupervisedNet(Network n) {
+		super(n);
+		changes = new FMatrix[n.sizes().length - 1];
+		for (int i = 0; i < changes.length; i++)
+			changes[i] = new FMatrix(weights[i].rows(), weights[i].columns());
+		nu = .3f;
+	}
+	
 	public SupervisedNet(int...sizes) {
 		super(sizes);
 		changes = new FMatrix[sizes.length - 1];
