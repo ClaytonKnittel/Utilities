@@ -4,6 +4,8 @@ import tensor.FMatrix;
 import tensor.FVector;
 import static tensor.MatFunctions.*;
 
+import methods.P;
+
 public class SupervisedNet extends Network {
 	
 	private FMatrix[] changes;
@@ -12,16 +14,20 @@ public class SupervisedNet extends Network {
 	
 	public static void main(String args[]) {
 		SupervisedNet n = new SupervisedNet(4, 3);
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < 300; i++) {
 			n.input(1, 0, 0, 0);
 			n.train(0, 0, 1);
 			n.applyChanges();
+			float f = n.weights[0].sumAbs();
+			P.pl("F: " + f);
+			if ((f + "").equals("NaN"))
+				break;
 		}
 		
-		n.save("/users/claytonknittel/documents/workspace/utilities/src/neuralNet/test.txt");
+		n.save("src/neuralNet/test.txt");
 		
-		NeuralNetVisualizer v = new NeuralNetVisualizer(n);
-		v.start();
+//		NeuralNetVisualizer v = new NeuralNetVisualizer(n);
+//		v.start();
 	}
 	
 	public SupervisedNet(Network n) {
@@ -64,7 +70,9 @@ public class SupervisedNet extends Network {
 	private void backPropagate(int layer, FVector v) {
 		if (layer < 0)
 			return;
-		
+
+		P.pl("Weights:\n" + weights[0]);
+		P.pl("ch =\n" + v + " outer " + activations[layer] + "\n\n");
 		changes[layer] = changes[layer].minus(v.outer(activations[layer]));
 		
 		if (layer == 0)

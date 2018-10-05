@@ -5,6 +5,8 @@ import java.util.List;
 import org.jblas.DoubleMatrix;
 import org.jblas.Solve;
 
+import methods.P;
+
 
 /**
  * A class of square matrices.
@@ -16,16 +18,7 @@ public class DMatrixN {
 	
 	protected DoubleMatrix m;
 	
-	protected static int acc = 4; // how many digits to round matrices to when printing, setting to 0 means don't round
-	
-	private static int mul;
-	
-	static {
-		int a = acc;
-		mul = 1;
-		while (a-- > 0)
-			mul *= 10;
-	}
+	protected static int acc = 7; // how many digits to round matrices to when printing, setting to 0 means don't round
 	
 	@SuppressWarnings("unused")
 	private DMatrixN() {}
@@ -302,9 +295,15 @@ public class DMatrixN {
 	}
 	
 	protected static double round(double d) {
-		if (acc == 0)
-			return d;
-		return (double) Math.round(d * mul) / mul;
+		String s = d + "";
+		String a;
+		if (s.contains("E")) {
+			a = s.substring(s.indexOf("E"));
+			P.pl(s);
+		}
+		else
+			a = "";
+		return Double.parseDouble(s.substring(0, Math.max(0, Math.min(s.length(), acc - a.length()))) + a);
 	}
 	
 }
